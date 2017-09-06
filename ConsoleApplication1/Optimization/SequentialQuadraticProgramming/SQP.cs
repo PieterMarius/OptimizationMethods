@@ -10,7 +10,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
         #region Fields
 
         private const double precisionConst = 1E-15;
-        private const double theta = 0.1;
+        private const double lambda = 0.5;
 
         private OptimizationNumericalDerivative numericalDerivative;
         private CGMethod linearSolver;
@@ -56,27 +56,67 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             double[] startValues,
             int nIter)
         {
+            return Execute(f, equalityConstraints, inequalityConstraints, startValues, nIter);
+        }
+        
+        /// <summary>
+        /// Minimize
+        /// </summary>
+        /// <param name="f"></param>
+        /// <param name="equalityConstraints"></param>
+        /// <param name="startValues"></param>
+        /// <param name="nIter"></param>
+        /// <returns></returns>
+        public Vector Minimize(
+            Func<Vector, double> f,
+            List<Func<Vector, double>> equalityConstraints,
+            double[] startValues,
+            int nIter)
+        {
+            return Execute(f, equalityConstraints, null, startValues, nIter);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private Vector Execute(
+            Func<Vector, double> f,
+            List<Func<Vector, double>> equalityConstraints,
+            List<Func<Vector, double>> inequalityConstraints,
+            double[] startValues,
+            int nIter)
+        {
             Vector xOld = new Vector(startValues);
             Vector xNew = new Vector(xOld.Vars);
 
-            Func<Vector, Vector, Vector, double> lagrangian = BuildLagrangian(f, equalityConstraints, inequalityConstraints);
+            List<Func<Vector, double>> eqConstraints = new List<Func<Vector, double>>();
 
-            Vector lambdaEq = new Vector(equalityConstraints.Count);
-            lambdaEq = Vector.Populate(lambdaEq, 2.0);
+            if (equalityConstraints != null)
+                eqConstraints = new List<Func<Vector, double>>(equalityConstraints);
 
-            Vector lambdaIq = new Vector(inequalityConstraints.Count);
-            lambdaIq = Vector.Populate(lambdaIq, 2.0);
+            List<Func<Vector, double>> inqConstraints = new List<Func<Vector, double>>();
 
-            //TODO verificare se eliminare a aggiungere alla matrice hessiana
-            //Vector derivativeOld = numericalDerivative.EvaluatePartialDerivative(lagrangian, xOld, lambdaEq, lambdaIq, 1);
+            if (inequalityConstraints != null)
+                inqConstraints = new List<Func<Vector, double>>(inequalityConstraints);
 
+            List<Func<Vector, double>> activeInqConstraints = GetActiveConstraint(inqConstraints, xNew);
+                        
+            Func<Vector, Vector, Vector, double> lagrangian = BuildLagrangian(f, eqConstraints, inqConstraints);
+
+            Vector lambdaEq = new Vector(eqConstraints.Count);
+            lambdaEq = Vector.Populate(lambdaEq, 0.0);
+
+            Vector lambdaIq = new Vector(inqConstraints.Count);
+            lambdaIq = Vector.Populate(lambdaIq, 0.0);
+                       
             Vector[] hessian = OptimizationHelper.GetIdentity(startValues.Length);
-            
+                        
             for (int i = 0; i < nIter; i++)
             {
-                Vector b = BuildVectorB(equalityConstraints, inequalityConstraints, lagrangian, lambdaEq, lambdaIq, xNew);
-                Vector[] A = BuildMatrixA(equalityConstraints, inequalityConstraints, hessian, lambdaIq, xNew);
-                
+                Vector b = BuildVectorB(eqConstraints, inqConstraints, lagrangian, lambdaEq, lambdaIq, xNew);
+                Vector[] A = BuildMatrixA(eqConstraints, inqConstraints, hessian, lambdaIq, xNew);
+
                 Vector direction = CalculateDirection(A, b, xOld, lambdaEq, lambdaIq);
 
                 xNew = xOld + new Vector(SubArray(direction.Vars, 0, xOld.Count()));
@@ -92,13 +132,9 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
 
                 xOld = xNew;
             }
-            
+
             return xNew;
         }
-
-        #endregion
-
-        #region Private Methods
 
         private Vector CalculateDirection(
             Vector[] A,
@@ -108,6 +144,9 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             Vector lambdaIq)
         {
             Vector startValue = Vector.Add(x, lambdaEq);
+
+            //Vector startValue = new Vector(x.Vars.Length);
+
 
             #region Inequality constraints
 
@@ -123,7 +162,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             #endregion
             
 
-            return linearSolver.Solve(A, b, startValue, 30);
+            return linearSolver.Solve(A, b, startValue, 100);
         }
 
         private Vector DisableLambda(
@@ -181,6 +220,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             return lagrangianDerivative * -1.0;
         }
 
+
         private Vector[] BuildMatrixA(
             List<Func<Vector, double>> equalityConstraints,
             List<Func<Vector, double>> inequalityConstraints,
@@ -191,11 +231,11 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             List<Vector> constraintDerivative = new List<Vector>();
 
             for (int i = 0; i < equalityConstraints.Count; i++)
-                constraintDerivative.Add(numericalDerivative.EvaluatePartialDerivative(equalityConstraints[i],x,1));
+                constraintDerivative.Add(numericalDerivative.EvaluatePartialDerivative(equalityConstraints[i], x, 1));
 
             for (int i = 0; i < inequalityConstraints.Count; i++)
             {
-                if(lambdaIq[i] != 0.0)
+                if (lambdaIq[i] != 0.0)
                     constraintDerivative.Add(numericalDerivative.EvaluatePartialDerivative(inequalityConstraints[i], x, 1));
             }
 
@@ -247,19 +287,32 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
 
             if (ys < 1E-15)
             {
-                Vector thetay = y * theta;
-                Vector bs = Vector.Mult(lagrangianHessian, s);
+                double theta = 0.999999;
 
-                y = thetay + (1 - theta) * bs;
+                Vector yNew = new Vector(y.Vars);
+                double ysNew = ys;
 
-                ys = y * s;
+                while (ysNew < lambda * s * partialDenom &&
+                       theta >= 0.0)
+                {
+                    yNew = y * theta + (1 - theta) * partialDenom;
+
+                    ysNew = yNew * s;
+
+                    theta = theta - 0.000001;
+                }
+
+                y = yNew;
+                ys = ysNew;
+
+                yy = Vector.Mult(y, y);
             }
 
             #endregion
 
             Vector[] addParam1 = Vector.Div(yy, ys);
             Vector[] addParam2 = Vector.Div(num, denom);
-            
+
             return Vector.Sum(Vector.Sum(lagrangianHessian, addParam1), addParam2);
         }
 
@@ -284,22 +337,22 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             return result;
         }
 
-        //private List<int> GetActiveConstraint(
-        //    List<Func<Vector, double>> inequalityConstraint,
-        //    Vector x)
-        //{
-        //    List<int> activeConstraint = new List<int>();
+        private List<Func<Vector, double>> GetActiveConstraint(
+            List<Func<Vector, double>> inequalityConstraint,
+            Vector x)
+        {
+            List<Func<Vector, double>> activeConstraint = new List<Func<Vector, double>>();
 
-        //    if (inequalityConstraint != null)
-        //    {
-        //        foreach (var func in inequalityConstraint.Select((value, i) => new { i, value }))
-        //        {
-        //            if (func.value(x) > 0)
-        //                activeConstraint.Add(func.i);
-        //        }
-        //    }
-        //    return activeConstraint;
-        //}
+            if (inequalityConstraint != null)
+            {
+                foreach (var func in inequalityConstraint)
+                {
+                    if (func(x) > 0)
+                        activeConstraint.Add(func);
+                }
+            }
+            return activeConstraint;
+        }
 
         private bool CheckEarlyExit(
             Vector xNew,

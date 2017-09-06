@@ -325,6 +325,85 @@ namespace ConsoleApplication1.Optimization
 
             return new Vector(vt);
         }
-                
+
+        public static Vector[] Transpose(Vector[] src)
+        {
+            Vector[] result = new Vector[src.Length];
+            for (int i = 0; i < result.Length; i++)
+                result[i] = new Vector(result.Length);
+            
+            for(int i = 0; i< src.Length; i++)
+            {
+                Vector buf = new Vector(src.Length);
+                for (int j = 0; j < src.Length; j++)
+                    buf.Vars[j] = src[j].Vars[i];
+
+                result[i] = buf;
+            }
+
+            return result;
+        }
+
+        public static bool Equals(Vector[] a, Vector[] b)
+        {
+            if (a.Length != b.Length)
+                return false;
+
+            for (int i = 0; i < a.Length; i++)
+            {
+                if (a[i].Vars.Length != b[i].Vars.Length)
+                    return false;
+
+                for (int j = 0; j < a[i].Vars.Length; j++)
+                {
+                    if (a[i].Vars[j] != b[i].Vars[j])
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool CheckPositiveMatrix(Vector[] m)
+        {
+            for (int i = 0; i < m.Length; i++)
+            {
+                if (m[i].Vars[i] < 0.0)
+                    return false;
+            }
+
+            return true;
+        }
+
+        public static bool CheckPositiveDefiniteMatrix(Vector[] m)
+        {
+            for (int i = 0; i < m.Length; i++)
+            {
+                double sum = 0.0;
+
+                if (m[i].Vars[i] < 0.0)
+                    return false;
+
+                for (int j = 0; j < m[i].Vars.Length; j++)
+                {
+                    sum += Math.Abs(m[i].Vars[j]);
+                }
+
+                if (m[i].Vars[i] < sum - m[i].Vars[i])
+                    return false;
+            }
+
+            return true;
+        }
+
+        public static Vector[] SetIdentity(Vector a)
+        {
+            Vector[] result = OptimizationHelper.GetIdentity(a.Vars.Length);
+
+            for (int i = 0; i < a.Vars.Length; i++)
+                result[i].Vars[i] = a.Vars[i];
+
+            return result;
+        }
     }
 }

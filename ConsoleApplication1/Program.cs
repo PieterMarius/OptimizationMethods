@@ -79,9 +79,20 @@ namespace ConsoleApplication1
                        10 * Math.Pow(x.Vars[0] - x.Vars[3], 4);
             };
 
-            TestSQP();
-            TestSQP1();
+            Vector[] ttt = new Vector[3];
+            ttt[0] = new Vector(new double[3] { 1, 2 ,3 });
+            ttt[1] = new Vector(new double[3] { 4, 5, 6 });
+            ttt[2] = new Vector(new double[3] { 7, 8, 9 });
 
+            var tr = Vector.Transpose(ttt);
+
+            //TestSQP();
+            //TestSQP1();
+            //TestSQP2();
+            TestSQP3();
+            //TestSQP4();
+
+            
 
             BFGS bfsg = new BFGS();
 
@@ -182,7 +193,89 @@ namespace ConsoleApplication1
 
             eqConstraint.Add(eqConstraint1);
 
-            var res = quadraticProgramming.Minimize(f, eqConstraint.ToArray(), null, new double[] { 0, 0 }, 50);
+            var res = quadraticProgramming.Minimize(f, eqConstraint, null, new double[] { 0, 0 }, 50);
+        }
+
+        static void TestSQP2()
+        {
+            SQP quadraticProgramming = new SQP();
+
+            Func<Vector, double> f = (x) =>
+            {
+                return -(5 - Math.Pow(x.Vars[0] - 2, 2) -
+                       2 * Math.Pow(x.Vars[1] - 1, 2));
+            };
+
+            List<Func<Vector, double>> eqConstraint = new List<Func<Vector, double>>();
+
+            Func<Vector, double> eqConstraint1 = (x) =>
+            {
+                return -x.Vars[0] -
+                       4 * x.Vars[1] + 3;
+            };
+
+            eqConstraint.Add(eqConstraint1);
+
+            var res = quadraticProgramming.Minimize(f, eqConstraint, null, new double[] { 0, 0 }, 50);
+        }
+
+        static void TestSQP3()
+        {
+            SQP quadraticProgramming = new SQP();
+
+            Func<Vector, double> f = (x) =>
+            {
+                return x.Vars[0] + x.Vars[1] + Math.Pow(x.Vars[2], 2);
+            };
+
+            List<Func<Vector, double>> eqConstraint = new List<Func<Vector, double>>();
+
+            Func<Vector, double> eqConstraint1 = (x) =>
+            {
+                return -x.Vars[0] + 1;
+            };
+
+            Func<Vector, double> eqConstraint2 = (x) =>
+            {
+                return -Math.Pow(x.Vars[0], 2) - Math.Pow(x.Vars[1], 2) + 1;
+            };
+
+            eqConstraint.Add(eqConstraint2);
+            eqConstraint.Add(eqConstraint1);
+
+            var res = quadraticProgramming.Minimize(f, eqConstraint, null, new double[] { 0, 0, 0 }, 1000);
+        }
+
+        static void TestSQP4()
+        {
+            SQP quadraticProgramming = new SQP();
+
+            Func<Vector, double> f = (x) =>
+            {
+
+                return 400 * Math.Pow(x.Vars[0], 2) +
+                       800 * Math.Pow(x.Vars[1], 2) +
+                       200 * x.Vars[0] * x.Vars[1] +
+                       1600 * Math.Pow(x.Vars[2], 2) +
+                       400 * x.Vars[1] * x.Vars[2];
+            };
+
+            List<Func<Vector, double>> eqConstraint = new List<Func<Vector, double>>();
+
+            Func<Vector, double> eqConstraint1 = (x) =>
+            {
+                return 1.2 - x.Vars[0] - x.Vars[1] - 1.5 * x.Vars[2];
+            };
+
+            Func<Vector, double> eqConstraint2 = (x) =>
+            {
+                return 1.0 - x.Vars[0] - x.Vars[1] - x.Vars[2];
+            };
+
+            eqConstraint.Add(eqConstraint2);
+            eqConstraint.Add(eqConstraint1);
+
+            var res = quadraticProgramming.Minimize(f, eqConstraint, null, new double[] { 0, 0, 0 }, 50);
         }
 
         static void TestSQP1()
@@ -205,7 +298,14 @@ namespace ConsoleApplication1
 
             eqConstraint.Add(eqConstraint1);
 
-            var res = quadraticProgramming.Minimize(f, eqConstraint.ToArray(), null, new double[] { 0, 0 }, 50);
+            var res = quadraticProgramming.Minimize(f, eqConstraint, null, new double[] { 0, 0 }, 50);
+        }
+
+        static void TestCGMethod()
+        {
+            CGMethod cg = new CGMethod();
+
+            //var sol = cg.Solve(A, x, new Vector(new double[3]), 50);
         }
 
         static double RationalApproximation(double t)
@@ -444,6 +544,21 @@ namespace ConsoleApplication1
                 return x + 0.5 * x * x;
             else
                 return Math.Exp(x) - 1.0;
+        }
+    }
+
+    public class Test
+    {
+        public int sum = 0;
+
+        public Test()
+        {
+
+        }
+
+        public void ExecuteTest()
+        {
+            sum++;
         }
     }
         

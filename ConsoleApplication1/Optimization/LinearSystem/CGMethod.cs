@@ -10,9 +10,7 @@ namespace ConsoleApplication1.Optimization.LinearSystem
     {
         #region Fields
 
-        private const double precisionConst = 1E-15;
-
-        private OptimizationNumericalDerivative numericalDerivative;
+        private const double precisionConst = 1E-50;
 
         public double Precision { get; private set; }
 
@@ -23,7 +21,6 @@ namespace ConsoleApplication1.Optimization.LinearSystem
         public CGMethod(
             double precision)
         {
-            numericalDerivative = new OptimizationNumericalDerivative(5, 2);
             Precision = precision;
         }
 
@@ -41,28 +38,43 @@ namespace ConsoleApplication1.Optimization.LinearSystem
             Vector startX,
             int nIter)
         {
-            Vector rOld = b - Vector.Mult(A, startX);
-            Vector rNew = new Vector(startX.Count());
-            Vector p = rOld;
+            Vector[] normA = A;
+            Vector normb = b;
+
+            if (!Vector.CheckPositiveDefiniteMatrix(A) ||
+                !Vector.Equals(A, Vector.Transpose(A)))
+            {
+                Vector[] At = Vector.Transpose(A);
+                normA = Vector.Mult(At, A);
+                normb = Vector.Mult(At, b);
+            }
+
+            Vector rNew = normb - Vector.Mult(normA, startX);
+            Vector p = rNew;
             Vector x = new Vector(startX.Vars);
+            double r2Old = rNew * rNew;
+
             double alpha = 1.0;
             double beta = 1.0;
 
             for (int i = 0; i < nIter; i++)
             {
-                alpha = GetAlpha(A, p, rOld);
+                alpha = GetAlpha(normA, p, r2Old);
 
                 x = x + alpha * p;
 
-                rNew = rOld - alpha * Vector.Mult(A, p);
+                rNew = rNew - alpha * Vector.Mult(normA, p);
 
-                if (rNew * rNew < Precision)
+                double r2New = rNew * rNew;
+
+                if (r2New < Precision)
                     return x;
 
-                beta = GetBeta(rNew, rOld);
+                beta = GetBeta(r2New, r2Old);
 
                 p = rNew + beta * p;
-                rOld = rNew;
+                                
+                r2Old = r2New;
             }
 
             return x;
@@ -75,9 +87,8 @@ namespace ConsoleApplication1.Optimization.LinearSystem
         public double GetAlpha(
             Vector[] A,
             Vector p,
-            Vector r)
+            double num)
         {
-            var num = r * r;
             var denom = p * Vector.Mult(A, p);
 
             if (denom == 0.0)
@@ -87,12 +98,9 @@ namespace ConsoleApplication1.Optimization.LinearSystem
         }
 
         public double GetBeta(
-            Vector rNew,
-            Vector rOld)
+            double num,
+            double denom)
         {
-            double num = rNew * rNew;
-            double denom = rOld * rOld;
-
             if (denom == 0.0)
                 return 1.0;
 
