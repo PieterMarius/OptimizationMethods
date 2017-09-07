@@ -89,10 +89,12 @@ namespace ConsoleApplication1
             //TestSQP();
             //TestSQP1();
             //TestSQP2();
-            TestSQP3();
+            //TestSQP3();
             //TestSQP4();
+            //TestSQP5();
+            //TestSQP6();
+            TestSQP7();
 
-            
 
             BFGS bfsg = new BFGS();
 
@@ -276,6 +278,100 @@ namespace ConsoleApplication1
             eqConstraint.Add(eqConstraint1);
 
             var res = quadraticProgramming.Minimize(f, eqConstraint, null, new double[] { 0, 0, 0 }, 50);
+        }
+
+        static void TestSQP5()
+        {
+            SQP quadraticProgramming = new SQP();
+
+            Func<Vector, double> f = (x) =>
+            {
+
+                return Math.Pow(x[0] - 2, 2) +
+                       2 * Math.Pow(x[1] - 1, 2);
+            };
+
+            List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+
+            Func<Vector, double> inqConstraint1 = (x) =>
+            {
+                return 3 - x[0] - 4 * x[1];
+            };
+
+            Func<Vector, double> inqConstraint2 = (x) =>
+            {
+                return x[0] - x[1];
+            };
+
+            inqConstraint.Add(inqConstraint1);
+            inqConstraint.Add(inqConstraint2);
+
+            var res = quadraticProgramming.Minimize(f, null, inqConstraint, new double[] { 1, 1 }, 50);
+        }
+
+        static void TestSQP6()
+        {
+            SQP quadraticProgramming = new SQP();
+
+            Func<Vector, double> f = (x) =>
+            {
+
+                return -(x[0] * (30 - x[0]) + x[1] * (50 - 2 * x[1]) - 3 * x[0] - 5 * x[1] - 10 * x[2]);
+            };
+
+            List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+
+            Func<Vector, double> inqConstraint1 = (x) =>
+            {
+                return x[0] + x[1] - x[2];
+            };
+
+            Func<Vector, double> inqConstraint2 = (x) =>
+            {
+                return x[2] - 17.25;
+            };
+
+            inqConstraint.Add(inqConstraint1);
+            inqConstraint.Add(inqConstraint2);
+
+            var res = quadraticProgramming.Minimize(f, null, inqConstraint, new double[] { 0, 0, 0 }, 100);
+        }
+
+        static void TestSQP7()
+        {
+            SQP quadraticProgramming = new SQP();
+
+            Func<Vector, double> f = (x) =>
+            {
+
+                return -(Math.Sin(x[0])*Math.Cos(x[1]) + Math.Cos(x[0]) * Math.Sin(x[1]));
+            };
+
+            List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+
+            Func<Vector, double> inqConstraint1 = (x) =>
+            {
+                return -x[0] - x[1];
+            };
+
+            Func<Vector, double> inqConstraint2 = (x) =>
+            {
+                return x[0] + x[1] - Math.PI;
+            };
+
+            inqConstraint.Add(inqConstraint1);
+            inqConstraint.Add(inqConstraint2);
+
+            List<Func<Vector, double>> eqConstraint = new List<Func<Vector, double>>();
+
+            Func<Vector, double> eqConstraint1 = (x) =>
+            {
+                return x[0] - Math.Pow(x[1], 3);
+            };
+
+            eqConstraint.Add(eqConstraint1);
+
+            var res = quadraticProgramming.Minimize(f, eqConstraint, inqConstraint, new double[] { 0, 0 }, 100);
         }
 
         static void TestSQP1()
