@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Optimization\BFGSAlgorithm\BFGS.cs" />
     <Compile Include="Optimization\LinearSystem\CGMethod.cs" />
+    <Compile Include="Optimization\SequentialQuadraticProgramming\InequalityContraintProperties.cs" />
     <Compile Include="Optimization\NumericalDerivative.cs" />
     <Compile Include="Optimization\OptimizationHelper.cs" />
     <Compile Include="Optimization\NonLinearConjugateGradient\NLCG.cs" />

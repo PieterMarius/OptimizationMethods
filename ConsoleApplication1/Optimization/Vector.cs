@@ -356,7 +356,7 @@ namespace ConsoleApplication1.Optimization
 
                 for (int j = 0; j < a[i].Vars.Length; j++)
                 {
-                    if (a[i].Vars[j] != b[i].Vars[j])
+                    if (Math.Abs(a[i].Vars[j] - b[i].Vars[j]) > 1E-10)
                         return false;
                 }
             }
