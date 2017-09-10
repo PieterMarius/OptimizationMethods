@@ -95,10 +95,10 @@ namespace ConsoleApplication1
             //TestSQP6();
             //TestSQP7();
             //TestSQP8();
-            //TestSQP9();
-            //TestSQP10();
+            TestSQP9();
+            TestSQP10();
             TestSQP11();
-            //TestSQP12();
+            TestSQP12();
 
             BFGS bfsg = new BFGS();
 
@@ -199,9 +199,12 @@ namespace ConsoleApplication1
 
             eqConstraint.Add(eqConstraint1);
 
-            var res = quadraticProgramming.Minimize(f, eqConstraint, null, new double[] { 0, 0 }, 50);
+            var res = quadraticProgramming.Minimize(f, eqConstraint, null, new double[] { 0, 0 }, 100);
         }
 
+        /// <summary>
+        /// x1 = 5/3, x2 = 1/3
+        /// </summary>
         static void TestSQP2()
         {
             SQP quadraticProgramming = new SQP();
@@ -225,6 +228,9 @@ namespace ConsoleApplication1
             var res = quadraticProgramming.Minimize(f, eqConstraint, null, new double[] { 0, 0 }, 50);
         }
 
+        /// <summary>
+        /// x1= 1.0, x2 = 0.0, x3 = 0.0
+        /// </summary>
         static void TestSQP3()
         {
             SQP quadraticProgramming = new SQP();
@@ -313,6 +319,9 @@ namespace ConsoleApplication1
             var res = quadraticProgramming.Minimize(f, null, inqConstraint, new double[] { 1, 1 }, 50);
         }
 
+        /// <summary>
+        /// x1 = 8.5, x2 = 8.75, x3 = 17.25
+        /// </summary>
         static void TestSQP6()
         {
             SQP quadraticProgramming = new SQP();
@@ -341,6 +350,9 @@ namespace ConsoleApplication1
             var res = quadraticProgramming.Minimize(f, null, inqConstraint, new double[] { 0, 0, 0 }, 200);
         }
 
+        /// <summary>
+        /// x1 = 0.688, x2 = 0.883
+        /// </summary>
         static void TestSQP7()
         {
             SQP quadraticProgramming = new SQP();
@@ -378,6 +390,9 @@ namespace ConsoleApplication1
             var res = quadraticProgramming.Minimize(f, eqConstraint, inqConstraint, new double[] { 0, 0 }, 100);
         }
 
+        /// <summary>
+        /// x1 = -1.0, x2 = -1.0
+        /// </summary>
         static void TestSQP8()
         {
             SQP quadraticProgramming = new SQP();
@@ -482,7 +497,7 @@ namespace ConsoleApplication1
 
 
         /// <summary>
-        /// Rosenbrock's function non linear constraints
+        /// Rosenbrock's function non linear constraints (x1 = 0.5, x2 = 0.25)
         /// </summary>
         static void TestSQP11()
         {
@@ -534,9 +549,13 @@ namespace ConsoleApplication1
 
 
 
-            var res = quadraticProgramming.Minimize(f, eqConstraint, inqConstraint, new double[] { 0.25, 0.25 }, 100);
+            var res = quadraticProgramming.Minimize(f, eqConstraint, inqConstraint, new double[] { 0.25, 0.25 }, 1000);
         }
 
+
+        /// <summary>
+        /// x1 = 1.4, x2 = 1.7
+        /// </summary>
         static void TestSQP12()
         {
             SQP quadraticProgramming = new SQP();

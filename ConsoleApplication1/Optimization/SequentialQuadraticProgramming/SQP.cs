@@ -54,6 +54,26 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             Func<Vector, double> f,
             List<Func<Vector, double>> equalityConstraints,
             List<Func<Vector, double>> inequalityConstraints,
+            Func<Vector, double> updateFunc,
+            double[] startValues,
+            int nIter)
+        {
+            return Execute(f, equalityConstraints, inequalityConstraints, startValues, nIter);
+        }
+
+        /// <summary>
+        /// Minimize
+        /// </summary>
+        /// <param name="f"></param>
+        /// <param name="equalityConstraints"></param>
+        /// <param name="inequalityConstraints"></param>
+        /// <param name="startValues"></param>
+        /// <param name="nIter"></param>
+        /// <returns></returns>
+        public Vector Minimize(
+            Func<Vector, double> f,
+            List<Func<Vector, double>> equalityConstraints,
+            List<Func<Vector, double>> inequalityConstraints,
             double[] startValues,
             int nIter)
         {
@@ -115,11 +135,8 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             List<Func<Vector, double>> activeInqConstraints = new List<Func<Vector, double>>(inqManager.Where(x => x.IsActive == true).Select(x => x.Function).ToList());
 
             Func<Vector, Vector, Vector, double> lagrangian = BuildLagrangian(f, eqConstraints, activeInqConstraints);
-
-            //Vector derivative = numericalDerivative.EvaluatePartialDerivative(f, xOld, 1);
-            //hessian = Vector.SetIdentity(derivative);
-
-            double equalityConstraintViolation = GetEqualityConstraintsViolation(eqConstraints, xNew);
+                        
+            double equalityConstraintViolation = 1.0;
 
             for (int i = 0; i < nIter; i++)
             {
@@ -146,7 +163,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
 
                 double newEqConstraintsViolation = GetEqualityConstraintsViolation(eqConstraints, xNew);
 
-                if (inqManager.Count(x => x.Lambda < 0.0) == 0 &&
+                if (inqManager.Count(x => !x.IsValid) == 0 &&
                     newEqConstraintsViolation <= equalityConstraintViolation)
                 {
                     Vector diff = xNew - xOld;
@@ -371,26 +388,26 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
                         func.item.IsValid = false;
 
                     //Se il working set è vuoto e il vincolo viene violato 
-                    if (func.item.Function(x) >= 0.0 &&
+                    if (!func.item.IsValid &&
                         emptyWorkingSet)
                     {
                         activationIndex.Add(func.i);
                     }
                     //Se il vincolo viene violato e il moltiplicatore è minore di zero
-                    else if (func.item.Function(x) >= 0.0 &&
+                    else if (!func.item.IsValid &&
                             func.item.Lambda < 0.0 &&
                             func.item.IsActive &&
                             !emptyWorkingSet)
                     {
                         disableIndex.Add(func.i);
                     }
-                    else if(func.item.Function(x) >= 0.0 &&
+                    else if(!func.item.IsValid &&
                             inequalityConstraints.Count(item => item.IsActive == true && item.Lambda > 0) == 
                             inequalityConstraints.Count(item => item.IsActive == true))
                     {
                         activationIndex.Add(func.i);
                     }
-                    else if (func.item.Function(x) < 0.0 &&
+                    else if (func.item.IsValid &&
                              func.item.Lambda < 0.0 &&
                              func.item.IsActive)
                         disableIndex.Add(func.i);
@@ -401,7 +418,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             //foreach(var item in activationIndex)
             if (activationIndex.Count > 0)
             {
-                int index = (lastActive % inequalityConstraints.Count) + 1;
+                int index = ((lastActive + 1) % inequalityConstraints.Count);
 
                 inequalityConstraints[index].IsActive = true;
             }
@@ -409,23 +426,8 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             //Disable Inequality Constraints
             if (disableIndex.Count > 0)
             {
-                inequalityConstraints[disableIndex[disableIndex.Count - 1]].IsActive = false;
-                
-                //for (int i = 0; i < inequalityConstraints.Count; i++)
-                //{
-                //    if(inequalityConstraints[i].Item1)
-                //    {
-                //        inequalityConstraints[i] = new Tuple<bool, double, Func<Vector, double>>(inequalityConstraints[i].Item1, 0.0, inequalityConstraints[i].Item3);
-                //    }
-                //}
+                inequalityConstraints[disableIndex[disableIndex.Count - 1]].IsActive = false;    
             }
-
-            //foreach (var item in disableIndex)
-            //    inequalityConstraints[item] = new Tuple<bool, double, Func<Vector, double>>(
-            //        false, 
-            //        inequalityConstraints[item].Item2, 
-            //        inequalityConstraints[item].Item3);
-
         }
 
         private double GetEqualityConstraintsViolation(
