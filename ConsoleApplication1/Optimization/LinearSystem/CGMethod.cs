@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace ConsoleApplication1.Optimization.LinearSystem
 {
     public sealed class CGMethod
@@ -41,14 +36,13 @@ namespace ConsoleApplication1.Optimization.LinearSystem
             Vector[] normA = A;
             Vector normb = b;
 
-            if (!Vector.CheckPositiveDefiniteMatrix(A) ||
-                !Vector.Equals(A, Vector.Transpose(A)))
+            if (!Vector.Equals(A, Vector.Transpose(A)))
             {
                 Vector[] At = Vector.Transpose(A);
                 normA = Vector.Mult(At, A);
                 normb = Vector.Mult(At, b);
             }
-
+            
             Vector rNew = normb - Vector.Mult(normA, startX);
             Vector p = rNew;
             Vector x = new Vector(startX.Vars);

@@ -14,6 +14,12 @@ namespace ConsoleApplication1.Optimization
             Array.Copy(variables, Vars, variables.Length);
         }
 
+        public Vector(Vector v)
+        {
+            Vars = new double[v.Vars.Length];
+            Array.Copy(v.Vars, Vars, v.Vars.Length);
+        }
+
         public Vector(double var)
         {
             Vars = new double[1];
@@ -344,26 +350,6 @@ namespace ConsoleApplication1.Optimization
             return result;
         }
 
-        public static bool Equals(Vector[] a, Vector[] b)
-        {
-            if (a.Length != b.Length)
-                return false;
-
-            for (int i = 0; i < a.Length; i++)
-            {
-                if (a[i].Vars.Length != b[i].Vars.Length)
-                    return false;
-
-                for (int j = 0; j < a[i].Vars.Length; j++)
-                {
-                    if (Math.Abs(a[i].Vars[j] - b[i].Vars[j]) > 1E-10)
-                        return false;
-                }
-            }
-
-            return true;
-        }
-
         public static bool CheckPositiveMatrix(Vector[] m)
         {
             for (int i = 0; i < m.Length; i++)
@@ -404,6 +390,40 @@ namespace ConsoleApplication1.Optimization
                 result[i].Vars[i] = a.Vars[i];
 
             return result;
+        }
+
+        public static bool Equals(Vector a, Vector b)
+        {
+            if (a.Count() != b.Count())
+                return false;
+
+            for (int i = 0; i < a.Count(); i++)
+            {
+                if (Math.Abs(a[i] - b[i]) > 1E-10)
+                    return false;
+            }
+
+            return true;
+        }
+
+        public static bool Equals(Vector[] a, Vector[] b)
+
+        {
+            if (a.Length != b.Length)
+                return false;
+
+            for (int i = 0; i < a.Length; i++)
+            {
+                if (!Equals(a[i], b[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        public double Length()
+        {
+            return Math.Sqrt(this * this);
         }
     }
 }

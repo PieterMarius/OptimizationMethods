@@ -1,4 +1,6 @@
 ﻿using ConsoleApplication1.Optimization.LinearSystem;
+using ConsoleApplication1.Optimization.NonLinearConjugateGradient;
+using ConsoleApplication1.Optimization.SteepestDescentMethod;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +14,10 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
         private const double precisionConst = 1E-25;
         private const double lambda = 0.5;
         private const double inequalityConstraintTol = 1E-5;
-        
+        private Random rnd = new Random();
+
         private OptimizationNumericalDerivative numericalDerivative;
-        private CGMethod linearSolver;
+        private MINRES linearSolver;
 
         public double Precision { get; private set; }
         public bool EarlyExit { get; private set; }
@@ -28,7 +31,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             bool earlyExit)
         {
             numericalDerivative = new OptimizationNumericalDerivative(5, 2);
-            linearSolver = new CGMethod();
+            linearSolver = new MINRES();
             Precision = precision;
             EarlyExit = earlyExit;
         }
@@ -54,11 +57,13 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             Func<Vector, double> f,
             List<Func<Vector, double>> equalityConstraints,
             List<Func<Vector, double>> inequalityConstraints,
+            Vector upperBound,
+            Vector lowerBound,
             Func<Vector, double> updateFunc,
             double[] startValues,
             int nIter)
         {
-            return Execute(f, equalityConstraints, inequalityConstraints, startValues, nIter);
+            return Execute(f, equalityConstraints, inequalityConstraints, upperBound, lowerBound, startValues, nIter);
         }
 
         /// <summary>
@@ -77,7 +82,37 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             double[] startValues,
             int nIter)
         {
-            return Execute(f, equalityConstraints, inequalityConstraints, startValues, nIter);
+            return Execute(f, equalityConstraints, inequalityConstraints, new Vector(), new Vector(), startValues, nIter);
+        }
+
+        /// <summary>
+        /// Minimize
+        /// </summary>
+        /// <param name="f"></param>
+        /// <param name="equalityConstraints"></param>
+        /// <param name="inequalityConstraints"></param>
+        /// <param name="upperBound"></param>
+        /// <param name="lowerBound"></param>
+        /// <param name="startValues"></param>
+        /// <param name="nIter"></param>
+        /// <returns></returns>
+        public Vector Minimize(
+            Func<Vector, double> f,
+            List<Func<Vector, double>> equalityConstraints,
+            List<Func<Vector, double>> inequalityConstraints,
+            Vector upperBound,
+            Vector lowerBound,
+            double[] startValues,
+            int nIter)
+        {
+            return Execute(
+                f,
+                equalityConstraints,
+                inequalityConstraints,
+                upperBound,
+                lowerBound,
+                startValues,
+                nIter);
         }
 
         /// <summary>
@@ -94,7 +129,14 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             double[] startValues,
             int nIter)
         {
-            return Execute(f, equalityConstraints, null, startValues, nIter);
+            return Execute(
+                f,
+                equalityConstraints,
+                null,
+                new Vector(),
+                new Vector(),
+                startValues,
+                nIter);
         }
 
         #endregion
@@ -105,6 +147,8 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             Func<Vector, double> f,
             List<Func<Vector, double>> equalityConstraints,
             List<Func<Vector, double>> inequalityConstraints,
+            Vector upperBound,
+            Vector lowerBound,
             double[] startValues,
             int nIter)
         {
@@ -125,68 +169,166 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             Vector lambdaEq = new Vector(eqConstraints.Count);
             lambdaEq = Vector.Populate(lambdaEq, 0.0);
 
-            List<InequalityContraintProperties> inqManager = new List<InequalityContraintProperties>();
+            List<InequalityConstraintProperties> inequalityConstraintsProp = new List<InequalityConstraintProperties>();
             foreach (var constraint in inqConstraints)
-                inqManager.Add(new InequalityContraintProperties(false, 0.0, constraint, false));
+                inequalityConstraintsProp.Add(new InequalityConstraintProperties(false, 0.0, constraint, false));
 
             Vector[] hessian = OptimizationHelper.GetIdentity(startValues.Length);
 
-            GetInequalityActiveConstraint(ref inqManager, xNew);
-            List<Func<Vector, double>> activeInqConstraints = new List<Func<Vector, double>>(inqManager.Where(x => x.IsActive == true).Select(x => x.Function).ToList());
+            GetInequalityActiveConstraint(ref inequalityConstraintsProp, xNew, true);
+            List<Func<Vector, double>> activeInqConstraints = new List<Func<Vector, double>>(inequalityConstraintsProp.Where(x => x.IsActive == true).Select(x => x.Function).ToList());
 
             Func<Vector, Vector, Vector, double> lagrangian = BuildLagrangian(f, eqConstraints, activeInqConstraints);
-                        
+
             double equalityConstraintViolation = 1.0;
 
             for (int i = 0; i < nIter; i++)
             {
-                Vector lambdaIq = new Vector(inqManager.Where(x => x.IsActive == true).Select(x => x.Lambda).ToArray());
-                
+                Vector lambdaIq = new Vector(inequalityConstraintsProp.Where(x => x.IsActive == true).Select(x => x.Lambda).ToArray());
+
                 Vector b = BuildVectorB(eqConstraints, activeInqConstraints, lagrangian, lambdaEq, lambdaIq, xNew);
                 Vector[] A = BuildMatrixA(eqConstraints, activeInqConstraints, hessian, xNew);
 
-                Vector direction = CalculateDirection(A, b, xOld, lambdaEq, lambdaIq);
+                Vector direction = CalculateDirection(A, b, xNew, lambdaEq, lambdaIq);
 
-                xNew = xOld + new Vector(SubArray(direction.Vars, 0, xOld.Count()));
-                                                
-                hessian = CalculateLagrangianHessian(lagrangian, hessian, xNew, xOld, lambdaEq, lambdaIq);
+                Vector directionX = new Vector(SubArray(direction.Vars, 0, xOld.Count()));
 
-                lambdaEq = lambdaEq + new Vector(SubArray(direction.Vars, xOld.Count(), lambdaEq.Count()));
-                lambdaIq = lambdaIq + new Vector(SubArray(direction.Vars, xOld.Count() + lambdaEq.Count(), lambdaIq.Count()));
+                Vector testLambdaIq = new Vector(SubArray(direction.Vars, xOld.Count() + lambdaEq.Count(), lambdaIq.Count()));
 
-                SetInequalityLambda(ref inqManager, lambdaIq);
-
-                GetInequalityActiveConstraint(ref inqManager, xNew);
-
-                activeInqConstraints = new List<Func<Vector, double>>(inqManager.Where(x => x.IsActive == true).Select(x => x.Function).ToList());
-                lagrangian = BuildLagrangian(f, eqConstraints, activeInqConstraints);
-
-                double newEqConstraintsViolation = GetEqualityConstraintsViolation(eqConstraints, xNew);
-
-                if (inqManager.Count(x => !x.IsValid) == 0 &&
-                    newEqConstraintsViolation <= equalityConstraintViolation)
+                if (RemoveInequalityNegativeLambda(ref inequalityConstraintsProp, testLambdaIq))
                 {
-                    Vector diff = xNew - xOld;
+                    activeInqConstraints = new List<Func<Vector, double>>(inequalityConstraintsProp.Where(x => x.IsActive == true).Select(x => x.Function).ToList());
+                    lagrangian = BuildLagrangian(f, eqConstraints, activeInqConstraints);
+                    continue;
+                }
 
+                if (directionX * directionX < 1E-40)
+                {
+                    lambdaIq = new Vector(SubArray(direction.Vars, xOld.Count() + lambdaEq.Count(), lambdaIq.Count()));
+
+                    SetInequalityLambda(ref inequalityConstraintsProp, lambdaIq);
+
+                    GetInequalityActiveConstraint(ref inequalityConstraintsProp, xNew, false);
+
+                    //TODO here early exit
                     if (EarlyExit &&
-                        diff * diff < precisionConst)
+                        inequalityConstraintsProp.Count(x => !x.IsValid) == 0 &&
+                        inequalityConstraintsProp.Count(x => x.Lambda < 0) == 0)
                     {
                         lastFeasibleSolution = xNew;
                         break;
                     }
-                    lastFeasibleSolution = xNew;
-                    equalityConstraintViolation = newEqConstraintsViolation;
+
+                    activeInqConstraints = new List<Func<Vector, double>>(inequalityConstraintsProp.Where(x => x.IsActive == true).Select(x => x.Function).ToList());
+                    lagrangian = BuildLagrangian(f, eqConstraints, activeInqConstraints);
 
                 }
+                else
+                {
+                    double step = ComputeStepLength(directionX, xOld, inequalityConstraintsProp);
 
-                xOld = xNew;
+                    if (step != 0.0)
+                    {
+                        xNew = xOld + step * directionX;
+
+                        //TODO Test
+                        TestInequalityViolation(inequalityConstraintsProp, xNew);
+
+                        hessian = CalculateLagrangianHessian(lagrangian, hessian, xNew, xOld, lambdaEq, lambdaIq);
+
+                        lambdaEq = new Vector(SubArray(direction.Vars, xOld.Count(), lambdaEq.Count()));
+                        lambdaIq = new Vector(SubArray(direction.Vars, xOld.Count() + lambdaEq.Count(), lambdaIq.Count()));
+
+                        SetInequalityLambda(ref inequalityConstraintsProp, lambdaIq);
+
+                        GetInequalityActiveConstraint(ref inequalityConstraintsProp, xNew, true);
+
+                        activeInqConstraints = new List<Func<Vector, double>>(inequalityConstraintsProp.Where(x => x.IsActive == true).Select(x => x.Function).ToList());
+                        lagrangian = BuildLagrangian(f, eqConstraints, activeInqConstraints);
+
+                        double newEqConstraintsViolation = GetEqualityConstraintsViolation(eqConstraints, xNew);
+
+                        if (inequalityConstraintsProp.Count(x => !x.IsValid) == 0 &&
+                            newEqConstraintsViolation <= equalityConstraintViolation)
+                        {
+                            lastFeasibleSolution = xNew;
+                            equalityConstraintViolation = newEqConstraintsViolation;
+                        }
+
+                        //xNew = ApplyBound(xNew, lowerBound, upperBound);
+
+                        xOld = xNew;
+                    }
+                    else
+                    {
+                        GetInequalityActiveConstraint(ref inequalityConstraintsProp, xNew, true);
+                        activeInqConstraints = new List<Func<Vector, double>>(inequalityConstraintsProp.Where(x => x.IsActive == true).Select(x => x.Function).ToList());
+                        lagrangian = BuildLagrangian(f, eqConstraints, activeInqConstraints);
+                    }
+                }
             }
 
             return lastFeasibleSolution;
         }
 
+        private bool RemoveInequalityNegativeLambda(
+            ref List<InequalityConstraintProperties> inequalityConstraintsProp,
+            Vector lambda)
+        {
+            bool removed = false;
+
+            SetInequalityLambda(ref inequalityConstraintsProp, lambda);
+            foreach (var item in inequalityConstraintsProp)
+            {
+                if (item.Lambda < 0)
+                {
+                    item.IsActive = false;
+                    item.Lambda = 0.0;
+                    removed = true;
+                    break;
+                }
+            }
+            return removed;
+        }
+
+        private void TestInequalityViolation(
+            List<InequalityConstraintProperties> inqManager,
+            Vector x)
+        {
+            foreach (var func in inqManager)
+            {
+                //Verifico la validità del vincolo
+                if (func.Function(x) < inequalityConstraintTol)
+                    func.IsValid = true;
+                else
+                    func.IsValid = false;
+            }
+        }
+
+        private Vector ApplyBound(
+            Vector x,
+            Vector lowerBound,
+            Vector upperBound)
+        {
+            Vector boundx = new Vector(x.Vars);
+
+            if (lowerBound.Count() == x.Count() &&
+                upperBound.Count() == x.Count())
+            {
+                for (int i = 0; i < x.Count(); i++)
+                {
+                    if (x[i] < lowerBound[i])
+                        boundx[i] = lowerBound[i];
+                    else if (x[i] > upperBound[i])
+                        boundx[i] = upperBound[i];
+                }
+            }
+
+            return boundx;
+        }
+
         private void SetInequalityLambda(
-            ref List<InequalityContraintProperties> inqManager,
+            ref List<InequalityConstraintProperties> inqManager,
             Vector inqLambda)
         {
             int lambdaIndex = 0;
@@ -209,7 +351,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
         {
             Vector startValue = Vector.Add(x, lambdaEq);
             startValue = Vector.Add(startValue, lambdaIq);
-            
+
             return linearSolver.Solve(A, b, startValue, 100);
         }
 
@@ -259,7 +401,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
 
             for (int i = 0; i < inequalityConstraints.Count; i++)
                 constraintDerivative.Add(numericalDerivative.EvaluatePartialDerivative(inequalityConstraints[i], x, 1));
-            
+
             Vector[] bufHessian = new Vector[lagrangianHessian.Length];
 
             Array.Copy(lagrangianHessian, bufHessian, lagrangianHessian.Length);
@@ -286,7 +428,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
         }
 
         private Vector[] CalculateLagrangianHessian(
-            Func<Vector, Vector,Vector, double> lagrangian,
+            Func<Vector, Vector, Vector, double> lagrangian,
             Vector[] lagrangianHessian,
             Vector xNew,
             Vector xOld,
@@ -358,9 +500,60 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             return result;
         }
 
+        private double ComputeStepLength(
+            Vector direction,
+            Vector x,
+            List<InequalityConstraintProperties> inequalityConstraints)
+        {
+            double stepLength = 1.0;
+
+            foreach (var item in inequalityConstraints.Where(k => !k.IsActive))
+            {
+                if (item.Function(x + direction) < inequalityConstraintTol)
+                    continue;
+
+                Vector derivative = numericalDerivative.EvaluatePartialDerivative(item.Function, x, 1);
+
+                double num = item.Function(x);
+
+                double denom = derivative * direction;
+                double step = 1.0;
+
+                //Func<Vector, double> ff = (k) =>
+                //{
+                //    return item.Function(x + k[0] * direction) * item.Function(x + k[0] * direction);
+                //};
+
+
+                ////Vector sol = bfgs.Solve(ff, new double[] { 1.0 }, 100);
+                ////Vector sol1 = bfgs.Solve(ff, new double[] { 0.3333 }, 100);
+
+                ////Vector sol2 = bfgs.Solve(item.Function, new double[] { 0.0, 0.0 }, 100);
+
+                ////double ttttt = ff(new Vector(sol.Vars));
+                //double stHelp = OptimizationHelper.StrongWolfeLineSearch(ff, direction, new Vector(new double[] { 1 }), 20);
+
+                ////double stepTest = OptimizationHelper.StrongWolfeLineSearch(item.Function, direction, x, 40);
+                //double test = item.Function(x + stHelp * direction);
+                ////step = sol[0];
+
+                if (denom != 0.0)
+                    step = Math.Min(1, Math.Abs(num / -denom));
+
+                if (Math.Abs(step) < Math.Abs(stepLength))
+                    stepLength = step;
+            }
+
+            if (stepLength != 0.0)
+                return stepLength;
+
+            return stepLength;
+        }
+
         private void GetInequalityActiveConstraint(
-            ref List<InequalityContraintProperties> inequalityConstraints,
-            Vector x)
+            ref List<InequalityConstraintProperties> inequalityConstraints,
+            Vector x,
+            bool update)
         {
             List<int> activationIndex = new List<int>();
             List<int> disableIndex = new List<int>();
@@ -368,13 +561,11 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             //Verifico che il working set sia vuoto
             bool emptyWorkingSet = inequalityConstraints.Count(item => item.IsActive == true) == 0;
 
-            if(emptyWorkingSet)
+            if (emptyWorkingSet)
             {
                 for (int i = 0; i < inequalityConstraints.Count; i++)
-                    inequalityConstraints[i] = new InequalityContraintProperties(false, 0.0, inequalityConstraints[i].Function, false);
+                    inequalityConstraints[i] = new InequalityConstraintProperties(false, 0.0, inequalityConstraints[i].Function, false);
             }
-
-            int lastActive = inequalityConstraints.FindLastIndex(item => item.IsActive);
 
             //Aggiungo e elimino in vincolo per volta
             if (inequalityConstraints != null)
@@ -401,8 +592,8 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
                     {
                         disableIndex.Add(func.i);
                     }
-                    else if(!func.item.IsValid &&
-                            inequalityConstraints.Count(item => item.IsActive == true && item.Lambda > 0) == 
+                    else if (!func.item.IsValid &&
+                            inequalityConstraints.Count(item => item.IsActive == true && item.Lambda > 0) ==
                             inequalityConstraints.Count(item => item.IsActive == true))
                     {
                         activationIndex.Add(func.i);
@@ -411,22 +602,60 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
                              func.item.Lambda < 0.0 &&
                              func.item.IsActive)
                         disableIndex.Add(func.i);
+                    else if (!func.item.IsValid && !func.item.IsActive)
+                        activationIndex.Add(func.i);
+                    else if (func.item.Function(x) == 0.0)
+                        activationIndex.Add(func.i);
                 }
             }
 
             //Activate Inequality Constraints
             //foreach(var item in activationIndex)
-            if (activationIndex.Count > 0)
+            if (activationIndex.Count > 0 && update)
             {
-                int index = ((lastActive + 1) % inequalityConstraints.Count);
+                int selIndex = activationIndex[rnd.Next(0, activationIndex.Count)];
 
-                inequalityConstraints[index].IsActive = true;
+                //double min = Math.Abs(inequalityConstraints[selIndex].Function(x));
+
+                //foreach (var item in activationIndex.Skip(1))
+                //{
+                //    //Seleziono il vincolo più vicino allo zero
+                //    double val = inequalityConstraints[item].Function(x);
+
+                //    if (val < min)
+                //    {
+                //        selIndex = item;
+                //        min = val;
+                //    }
+                //}
+
+                //inequalityConstraints[selIndex].IsActive = true;
+                //inequalityConstraints[selIndex].Lambda = 0.0;
+
+                foreach (var item in activationIndex)
+                {
+                    inequalityConstraints[item].IsActive = true;
+                    inequalityConstraints[item].Lambda = 0.0;
+                }
             }
 
             //Disable Inequality Constraints
-            if (disableIndex.Count > 0)
+            if (disableIndex.Count > 0 && !update)
             {
-                inequalityConstraints[disableIndex[disableIndex.Count - 1]].IsActive = false;    
+
+                double min = inequalityConstraints[disableIndex[0]].Lambda;
+                int minIndex = disableIndex[0];
+
+                for (int i = 1; i < disableIndex.Count; ++i)
+                {
+                    if (inequalityConstraints[disableIndex[i]].Lambda < min)
+                    {
+                        min = inequalityConstraints[disableIndex[i]].Lambda;
+                        minIndex = i;
+                    }
+                }
+
+                inequalityConstraints[minIndex].IsActive = false;
             }
         }
 
@@ -441,7 +670,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
 
             return violationSum;
         }
-                
+
         #endregion
 
     }

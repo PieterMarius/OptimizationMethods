@@ -2,17 +2,17 @@
 
 namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
 {
-    public class InequalityContraintProperties
+    public class InequalityConstraintProperties
     {
         public bool IsActive { get; set; }
         public double Lambda { get; set; }
         public Func<Vector, double> Function { get; set; }
         public bool IsValid { get; set; }
 
-        public InequalityContraintProperties()
+        public InequalityConstraintProperties()
         { }
 
-        public InequalityContraintProperties(
+        public InequalityConstraintProperties(
             bool isActive,
             double lambda,
             Func<Vector, double> function,

@@ -14,7 +14,7 @@ namespace ConsoleApplication1.Optimization
             Vector x0,
             double alpham)
         {
-            int maxIter = 5;
+            int maxIter = 10;
             
             double alphap = 0;
 
@@ -53,7 +53,7 @@ namespace ConsoleApplication1.Optimization
                 fxp = fxx;
                 gxp = gxx;
 
-                double r = 0.8; // rnd.NextDouble()
+                double r = 0.8; //rnd.NextDouble()
 
                 alphax = alphax + (alpham - alphax) * r;
             }
