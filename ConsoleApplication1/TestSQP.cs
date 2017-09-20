@@ -367,36 +367,37 @@ namespace ConsoleApplication1
                 return Math.Pow(x[0] - (1.0 / 3.0), 2) + Math.Pow(x[1] - (1.0 / 3.0), 2) - Math.Pow(1.0 / 3.0, 2);
             };
 
-            Func<Vector, double> inqConstraint1 = (x) =>
-            {
-                return x[0] - 0.5;
-            };
+            //Func<Vector, double> inqConstraint1 = (x) =>
+            //{
+            //    return x[0] - 0.5;
+            //};
 
-            Func<Vector, double> inqConstraint2 = (x) =>
-            {
-                return x[1] - 0.8;
-            };
+            //Func<Vector, double> inqConstraint2 = (x) =>
+            //{
+            //    return x[1] - 0.8;
+            //};
 
-            Func<Vector, double> inqConstraint3 = (x) =>
-            {
-                return -x[0];
-            };
+            //Func<Vector, double> inqConstraint3 = (x) =>
+            //{
+            //    return -x[0];
+            //};
 
-            Func<Vector, double> inqConstraint4 = (x) =>
-            {
-                return -x[1] + 0.2;
-            };
+            //Func<Vector, double> inqConstraint4 = (x) =>
+            //{
+            //    return -x[1] + 0.2;
+            //};
 
             inqConstraint.Add(eqConstraint1);
-            inqConstraint.Add(inqConstraint1);
-            inqConstraint.Add(inqConstraint2);
-            inqConstraint.Add(inqConstraint3);
-            inqConstraint.Add(inqConstraint4);
+            //inqConstraint.Add(inqConstraint1);
+            //inqConstraint.Add(inqConstraint2);
+            //inqConstraint.Add(inqConstraint3);
+            //inqConstraint.Add(inqConstraint4);
+
 
             Vector upperBound = new Vector(new double[] { 0.5, 0.8 });
             Vector lowerBound = new Vector(new double[] { 0.0, 0.2 });
-
-            var res = quadraticProgramming.Minimize(f, null, inqConstraint, upperBound, lowerBound, new double[] { 0.25, 0.25 }, 1000);
+            
+            var res = quadraticProgramming.Minimize(f, null, inqConstraint, lowerBound, upperBound, new double[] { 0.25, 0.25 }, 1000);
         }
 
 
@@ -680,9 +681,7 @@ namespace ConsoleApplication1
             
 
             List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
-
-                   
-
+            
             Func<Vector, double> eqConstraint1 = (x) =>
             {
                 return Math.Pow(x[0],2) - x[0] - x[1] + 1;

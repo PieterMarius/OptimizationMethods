@@ -6,7 +6,7 @@ namespace ConsoleApplication1.Optimization
 {
     public struct Vector
     {
-        public double[] Vars { get; set; }
+        public double[] Vars { get; private set; }
         
         public Vector(double[] variables)
         {
@@ -29,6 +29,14 @@ namespace ConsoleApplication1.Optimization
         public Vector(int dim)
         {
             Vars = new double[dim];
+        }
+
+        public bool IsNull()
+        {
+            if (Vars != null)
+                return false;
+
+            return true;
         }
 
         public double this[int i]
