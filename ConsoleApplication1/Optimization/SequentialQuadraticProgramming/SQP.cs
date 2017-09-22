@@ -182,6 +182,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             Func<Vector, Vector, Vector, double> lagrangian = BuildLagrangian(f, eqConstraints, activeInqConstraints);
 
             double equalityConstraintViolation = 1.0;
+            double lastMinValue = 1.0;
 
             for (int i = 0; i < nIter; i++)
             {
@@ -198,13 +199,14 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
 
                 if (RemoveNegativeLambda(ref inequalityConstraintsProp, newLambdaIq))
                 {
-                    inequalityConstraintsProp = SetInequalityLambda(inequalityConstraintsProp, newLambdaIq);
                     activeInqConstraints = new List<Func<Vector, double>>(inequalityConstraintsProp.Where(x => x.IsActive == true).Select(x => x.Function).ToList());
                     lagrangian = BuildLagrangian(f, eqConstraints, activeInqConstraints);
                     continue;
                 }
 
-                if (directionX * directionX < 1E-25)
+                double lastDirectionValue = directionX * directionX;
+
+                if (lastDirectionValue < precisionConst)
                 {
                     lambdaIq = newLambdaIq;
 
@@ -246,14 +248,19 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
 
                     double newEqConstraintsViolation = GetEqualityConstraintsViolation(eqConstraints, xNew);
 
-                    if (inequalityConstraintsProp.Count(x => !x.IsValid) == 0 &&
+                    double minValue = f(xNew);
+
+                    if (minValue < lastMinValue &&
+                        inequalityConstraintsProp.Count(x => !x.IsValid) == 0 &&
                         newEqConstraintsViolation <= equalityConstraintViolation)
                     {
                         lastFeasibleSolution = xNew;
                         equalityConstraintViolation = newEqConstraintsViolation;
+                        lastMinValue = minValue;
                     }
 
                     xOld = xNew;
+
                 }
             }
 
@@ -339,8 +346,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
                         boundx[i] = upperBound[i];
                 }
             }
-
-            if (!lowerBound.IsNull())
+            else if (!lowerBound.IsNull())
             {
                 for (int i = 0; i < x.Count(); i++)
                 {
@@ -348,8 +354,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
                         boundx[i] = lowerBound[i];
                 }
             }
-
-            if (!upperBound.IsNull())
+            else if (!upperBound.IsNull())
             {
                 for (int i = 0; i < x.Count(); i++)
                 {
@@ -422,7 +427,6 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
 
             return lagrangianDerivative * -1.0;
         }
-
 
         private Vector[] BuildMatrixA(
             List<Func<Vector, double>> equalityConstraints,
@@ -548,22 +552,14 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
                 if (item.Function(x + direction) < inequalityConstraintTol)
                     continue;
 
-                Vector derivative = numericalDerivative.EvaluatePartialDerivative(item.Function, x, 1);
+                Func<Vector, double> fBase = (k) => { return item.Function(k) * item.Function(k); };
 
-                double num = item.Function(x);
+                double step = OptimizationHelper.StrongWolfeLineSearch(fBase, direction, x, 10);
 
-                double denom = derivative * direction;
-                double step = 1.0;
-
-                if (denom != 0.0)
-                    step = Math.Min(1.0, Math.Abs(num / -denom));
-
-                if (Math.Abs(step) < Math.Abs(stepLength) && step != 0.0)
+                if (step < stepLength &&
+                    step > 1E-50)
                     stepLength = step;
             }
-
-            if (stepLength != 0.0)
-                return stepLength;
 
             return stepLength;
         }
