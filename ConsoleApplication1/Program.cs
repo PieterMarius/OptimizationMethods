@@ -30,21 +30,21 @@ namespace ConsoleApplication1
             Console.WriteLine(InverseCDF.QNorm(0.31, 0, 1, true, false));
 
             //x4−8x2 + 5
-            Func<Vector, double> testFunc1 = (x) =>
+            Func<double[], double> testFunc1 = (x) =>
             {
-                return Math.Pow(x.Vars[0], 4) - 8 * Math.Pow(x.Vars[0], 2) + 5;
+                return Math.Pow(x[0], 4) - 8 * Math.Pow(x[0], 2) + 5;
             };
 
-            Func<Vector, double>[] dtestFunc1 = new Func<Vector, double>[1];
+            Func<double[], double>[] dtestFunc1 = new Func<double[], double>[1];
 
             dtestFunc1[0] = (x) =>
             {
-                return 4 * Math.Pow(x.Vars[0], 3) - 16 * x.Vars[0];
+                return 4 * Math.Pow(x[0], 3) - 16 * x[0];
             };
 
-            Func<Vector, double> testConstr = (x) =>
+            Func<double[], double> testConstr = (x) =>
             {
-                return 5 - Math.Exp(x.Vars[0]) + 2.0 * Math.Pow(x.Vars[0] - 1, 2);
+                return 5 - Math.Exp(x[0]) + 2.0 * Math.Pow(x[0] - 1, 2);
             };
 
             Func<double[], double> testv = (x) =>
@@ -66,25 +66,25 @@ namespace ConsoleApplication1
 
             //TestFunc();
 
-            Func<Vector, double> bananaFunc = (x) =>
+            Func<double[], double> bananaFunc = (x) =>
             {
-                return Math.Pow(1 - x.Vars[0], 2) + 100 * Math.Pow(x.Vars[1] - x.Vars[0] * x.Vars[0], 2);
+                return Math.Pow(1 - x[0], 2) + 100 * Math.Pow(x[1] - x[0] * x[0], 2);
             };
 
-            Func<Vector, double> powell = (x) =>
+            Func<double[], double> powell = (x) =>
             {
-                return Math.Pow(x.Vars[0] + 10*x.Vars[1], 2) + 
-                       5 * Math.Pow(x.Vars[2] - x.Vars[3], 2) +
-                       Math.Pow(x.Vars[1] + 2 * x.Vars[2], 4) +
-                       10 * Math.Pow(x.Vars[0] - x.Vars[3], 4);
+                return Math.Pow(x[0] + 10*x[1], 2) + 
+                       5 * Math.Pow(x[2] - x[3], 2) +
+                       Math.Pow(x[1] + 2 * x[2], 4) +
+                       10 * Math.Pow(x[0] - x[3], 4);
             };
 
-            Vector[] ttt = new Vector[3];
-            ttt[0] = new Vector(new double[3] { 1, 2 ,3 });
-            ttt[1] = new Vector(new double[3] { 4, 5, 6 });
-            ttt[2] = new Vector(new double[3] { 7, 8, 9 });
+            MinVector[] ttt = new MinVector[3];
+            ttt[0] = new MinVector(new double[3] { 1, 2 ,3 });
+            ttt[1] = new MinVector(new double[3] { 4, 5, 6 });
+            ttt[2] = new MinVector(new double[3] { 7, 8, 9 });
 
-            var tr = Vector.Transpose(ttt);
+            var tr = MinVector.Transpose(ttt);
 
             //TestsSQP.Test0();
             //TestsSQP.Test1();
@@ -116,20 +116,20 @@ namespace ConsoleApplication1
 
             NLCG gradient = new NLCG();
 
-            Vector result = gradient.Solve(powell,   new double[] { 3.0, -1.0, 0.0, 1.0 }, 4000);
+            var result = gradient.Solve(powell,   new double[] { 3.0, -1.0, 0.0, 1.0 }, 4000);
 
             Console.WriteLine("Min " + powell(result));
 
             SteepestDescent gradientSteep = new SteepestDescent();
 
-            Vector result1 = gradientSteep.Solve(powell, new double[] { 3.0, -1.0, 0.0, 1.0 }, 10000);
+            var result1 = gradientSteep.Solve(powell, new double[] { 3.0, -1.0, 0.0, 1.0 }, 10000);
 
             Console.WriteLine("Min " + powell(result1));
 
             //Variables result = SteepestDescent(testFunc, dTestFunc, 2, 20);
 
-            for (int i = 0; i < result.Vars.Length; i++)
-                Console.WriteLine("result " + result.Vars[i]);
+            for (int i = 0; i < result.Length; i++)
+                Console.WriteLine("result " + result[i]);
 
             //Console.WriteLine("ver " + testFunc(result));
 
@@ -140,25 +140,25 @@ namespace ConsoleApplication1
         
         static void TestFunc()
         {
-            Vector a = new Vector(new double[] { 1, 2 });
-            Vector b = new Vector(new double[] { 3, 4 });
+            MinVector a = new MinVector(new double[] { 1, 2 });
+            MinVector b = new MinVector(new double[] { 3, 4 });
 
-            Vector c = new Vector(new double[] { 1, 3 });
-            Vector d = new Vector(new double[] { 4, 7 });
+            MinVector c = new MinVector(new double[] { 1, 3 });
+            MinVector d = new MinVector(new double[] { 4, 7 });
 
-            var res = Vector.Mult(a, b);
+            var res = MinVector.Mult(a, b);
 
-            var res1 = Vector.SubtractFromIdentity(res);
+            var res1 = MinVector.SubtractFromIdentity(res);
 
-            var res2 = Vector.Div(res, 2);
+            var res2 = MinVector.Div(res, 2);
 
-            Vector[] aa = new Vector[] { a, b };
-            Vector[] bb = new Vector[] { c, d };
+            MinVector[] aa = new MinVector[] { a, b };
+            MinVector[] bb = new MinVector[] { c, d };
 
-            var res3 = Vector.Mult(res, bb);
-            var res4 = Vector.Sum(res, bb);
+            var res3 = MinVector.Mult(res, bb);
+            var res4 = MinVector.Sum(res, bb);
 
-            var res5 = Vector.Mult(res, c);
+            var res5 = MinVector.Mult(res, c);
 
             
         }
@@ -170,38 +170,38 @@ namespace ConsoleApplication1
             MINRES minres = new MINRES();
             CGMethod cg = new CGMethod();
 
-            Vector[] A2 = new Vector[3];
-            A2[0] = new Vector(new double[] { 2, 1, 3 });
-            A2[1] = new Vector(new double[] { 2, 6, 8 });
-            A2[2] = new Vector(new double[] { 6, 8, 18 });
+            MinVector[] A2 = new MinVector[3];
+            A2[0] = new MinVector(new double[] { 2, 1, 3 });
+            A2[1] = new MinVector(new double[] { 2, 6, 8 });
+            A2[2] = new MinVector(new double[] { 6, 8, 18 });
 
-            Vector b2 = new Vector(new double[] { 1, 3, 5 });
+            MinVector b2 = new MinVector(new double[] { 1, 3, 5 });
 
-            var minresSol = minres.Solve(A2, b2, new Vector(new double[3]), 50);
-            var sol2 = cg.Solve(A2, b2, new Vector(new double[3]), 50);
+            var minresSol = minres.Solve(A2, b2, new MinVector(new double[3]), 50);
+            var sol2 = cg.Solve(A2, b2, new MinVector(new double[3]), 50);
 
-            Vector[] A = new Vector[3];
-            A[0] = new Vector(new double[] { 2, 0, 1 });
-            A[1] = new Vector(new double[] { 1, 6, 0 });
-            A[2] = new Vector(new double[] { 3, 2, 3 });
+            MinVector[] A = new MinVector[3];
+            A[0] = new MinVector(new double[] { 2, 0, 1 });
+            A[1] = new MinVector(new double[] { 1, 6, 0 });
+            A[2] = new MinVector(new double[] { 3, 2, 3 });
 
-            Vector x = new Vector(new double[] { 2, 5, 7 });
+            MinVector x = new MinVector(new double[] { 2, 5, 7 });
             
-            var sol = cg.Solve(A, x, new Vector(new double[3]), 50);
-            var solm = minres.Solve(A, x, new Vector(new double[3]), 50);
+            var sol = cg.Solve(A, x, new MinVector(new double[3]), 50);
+            var solm = minres.Solve(A, x, new MinVector(new double[3]), 50);
 
-            Vector[] A1 = new Vector[3];
-            A1[0] = new Vector(new double[] { 3, 1, -6 });
-            A1[1] = new Vector(new double[] { 2, 1, -5 });
-            A1[2] = new Vector(new double[] { 6, -3, 3 });
+            MinVector[] A1 = new MinVector[3];
+            A1[0] = new MinVector(new double[] { 3, 1, -6 });
+            A1[1] = new MinVector(new double[] { 2, 1, -5 });
+            A1[2] = new MinVector(new double[] { 6, -3, 3 });
 
-            Vector b1 = new Vector(new double[] { -10, -8, 0 });
+            MinVector b1 = new MinVector(new double[] { -10, -8, 0 });
 
-            var sol1 = cg.Solve(A1, b1, new Vector(new double[3]), 200);
-            var solm1 = minres.Solve(A1, b1, new Vector(new double[3]), 200);
+            var sol1 = cg.Solve(A1, b1, new MinVector(new double[3]), 200);
+            var solm1 = minres.Solve(A1, b1, new MinVector(new double[3]), 200);
 
-            Vector diff = b1 - Vector.Mult(A1, solm1);
-            Vector diff1 = b1 - Vector.Mult(A1, sol1);
+            MinVector diff = b1 - MinVector.Mult(A1, solm1);
+            MinVector diff1 = b1 - MinVector.Mult(A1, sol1);
         }
 
         static double RationalApproximation(double t)

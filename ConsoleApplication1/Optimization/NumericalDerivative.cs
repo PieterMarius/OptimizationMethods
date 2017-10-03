@@ -6,16 +6,16 @@ using System.Linq;
 
 namespace ConsoleApplication1.Optimization
 {
-   
+
     public class OptimizationNumericalDerivative
     {
-        readonly int _points;
-        int _center;
-        double _stepSize = Math.Pow(2, -10);
-        double _epsilon = Precision.PositiveMachineEpsilon;
-        double _baseStepSize = Math.Pow(2, -26);
-        StepType _stepType = StepType.Relative;
-        readonly FiniteDifferenceCoefficients _coefficients;
+        private readonly int _points;
+        private int _center;
+        private double _stepSize = Math.Pow(2, -10);
+        private double _epsilon = Precision.PositiveMachineEpsilon;
+        private double _baseStepSize = Math.Pow(2, -26);
+        private StepType _stepType = StepType.Relative;
+        private readonly FiniteDifferenceCoefficients _coefficients;
 
         /// <summary>
         /// Initializes a NumericalDerivative class with the default 3 point center difference method.
@@ -154,8 +154,9 @@ namespace ConsoleApplication1.Optimization
         /// <param name="order">Derivative order.</param>
         /// <param name="currentValue">Current function value at center.</param>
         /// <returns>Function derivative at x of the specified order.</returns>
-        public double EvaluateDerivative(Func<Vector, double> f, double x, int order, double? currentValue = null)
+        public double EvaluateDerivative(Func<double[], double> f, double x, int order, double? currentValue = null)
         {
+            var xmin = new MinVector(x);
             var c = _coefficients.GetCoefficients(Center, order);
             var h = CalculateStepSize(_points, x, order);
 
@@ -166,7 +167,7 @@ namespace ConsoleApplication1.Optimization
                     points[i] = currentValue.Value;
                 else if (c[i] != 0) // Only evaluate function if it will actually be used.
                 {
-                    points[i] = f(new Vector(x + (i - Center) * h));
+                    points[i] = f((new MinVector(xmin + (i - Center) * h)).MinArray);
                     Evaluations++;
                 }
             }
@@ -180,7 +181,7 @@ namespace ConsoleApplication1.Optimization
         /// <param name="f">Input function handle.</param>
         /// <param name="order">Derivative order.</param>
         /// <returns>Function handle that evaluates the derivative of input function at a fixed order.</returns>
-        public Func<double, double> CreateDerivativeFunctionHandle(Func<Vector, double> f, int order)
+        public Func<double, double> CreateDerivativeFunctionHandle(Func<double[], double> f, int order)
         {
             return x => EvaluateDerivative(f, x, order);
         }
@@ -194,7 +195,7 @@ namespace ConsoleApplication1.Optimization
         /// <param name="order">Derivative order.</param>
         /// <param name="currentValue">Current function value at center.</param>
         /// <returns>Function partial derivative at x of the specified order.</returns>
-        public double EvaluatePartialDerivative(Func<Vector, double> f, Vector x, int parameterIndex, int order, double? currentValue = null)
+        public double EvaluatePartialDerivative(Func<double[], double> f, double[] x, int parameterIndex, int order, double? currentValue = null)
         {
             var xi = x[parameterIndex];
             var c = _coefficients.GetCoefficients(Center, order);
@@ -218,11 +219,11 @@ namespace ConsoleApplication1.Optimization
             return EvaluateDerivative(points, order, h);
         }
 
-        public Vector EvaluatePartialDerivative(Func<Vector, double> f, Vector x, int order, double? currentValue = null)
+        public double[] EvaluatePartialDerivative(Func<double[], double> f, double[] x, int order, double? currentValue = null)
         {
-            Vector res = new Vector(x.Vars.Length);
+            double[] res = new double[x.Length];
 
-            for (int j = 0; j < x.Vars.Length; j++)
+            for (int j = 0; j < x.Length; j++)
             {
                 var xi = x[j];
                 var c = _coefficients.GetCoefficients(Center, order);
@@ -248,11 +249,17 @@ namespace ConsoleApplication1.Optimization
             return res;
         }
 
-        public Vector EvaluatePartialDerivative(Func<Vector, Vector, Vector, double> f, Vector x, Vector lambdaEq, Vector lambdaIq, int order, double? currentValue = null)
+        public double[] EvaluatePartialDerivative(
+            Func<double[], double[], double[], double> f,
+            double[] x,
+            double[] lambdaEq,
+            double[] lambdaIq,
+            int order,
+            double? currentValue = null)
         {
-            Vector res = new Vector(x.Vars.Length);
+            double[] res = new double[x.Length];
 
-            for (int j = 0; j < x.Vars.Length; j++)
+            for (int j = 0; j < x.Length; j++)
             {
                 var xi = x[j];
                 var c = _coefficients.GetCoefficients(Center, order);
@@ -290,7 +297,7 @@ namespace ConsoleApplication1.Optimization
         /// <param name="order">Derivative order.</param>
         /// <param name="currentValue">Current function value at center.</param>
         /// <returns>Vector of functions partial derivatives at x of the specified order.</returns>
-        public double[] EvaluatePartialDerivative(Func<Vector, double>[] f, Vector x, int parameterIndex, int order, double?[] currentValue = null)
+        public double[] EvaluatePartialDerivative(Func<double[], double>[] f, double[] x, int parameterIndex, int order, double?[] currentValue = null)
         {
             var df = new double[f.Length];
             for (int i = 0; i < f.Length; i++)
@@ -311,7 +318,7 @@ namespace ConsoleApplication1.Optimization
         /// <param name="parameterIndex">Index of the independent variable for partial derivative.</param>
         /// <param name="order">Derivative order.</param>
         /// <returns>Function handle that evaluates partial derivative of input function at a fixed order.</returns>
-        public Func<Vector, double> CreatePartialDerivativeFunctionHandle(Func<Vector, double> f, int parameterIndex,
+        public Func<double[], double> CreatePartialDerivativeFunctionHandle(Func<double[], double> f, int parameterIndex,
                                                                             int order)
         {
             return x => EvaluatePartialDerivative(f, x, parameterIndex, order);
@@ -324,7 +331,7 @@ namespace ConsoleApplication1.Optimization
         /// <param name="parameterIndex">Index of the independent variable for partial derivative.</param>
         /// <param name="order">Derivative order.</param>
         /// <returns>Function handle that evaluates partial derivative of input function at fixed order.</returns>
-        public Func<Vector, double[]> CreatePartialDerivativeFunctionHandle(Func<Vector, double>[] f,
+        public Func<double[], double[]> CreatePartialDerivativeFunctionHandle(Func<double[], double>[] f,
                                                                             int parameterIndex,
                                                                             int order)
         {
@@ -345,7 +352,7 @@ namespace ConsoleApplication1.Optimization
         /// <param name="order">Highest order of differentiation.</param>
         /// <param name="currentValue">Current function value at center.</param>
         /// <returns>Function mixed partial derivative at x of the specified order.</returns>
-        public double EvaluateMixedPartialDerivative(Func<Vector, double> f, Vector x, int[] parameterIndex,
+        public double EvaluateMixedPartialDerivative(Func<double[], double> f, double[] x, int[] parameterIndex,
                                                      int order, double? currentValue = null)
         {
             if (parameterIndex.Length != order)
@@ -391,7 +398,7 @@ namespace ConsoleApplication1.Optimization
         /// <param name="order">Highest order of differentiation.</param>
         /// <param name="currentValue">Current function value at center.</param>
         /// <returns>Function mixed partial derivatives at x of the specified order.</returns>
-        public double[] EvaluateMixedPartialDerivative(Func<Vector, double>[] f, Vector x, int[] parameterIndex,
+        public double[] EvaluateMixedPartialDerivative(Func<double[], double>[] f, double[] x, int[] parameterIndex,
                                                        int order, double?[] currentValue = null)
         {
             var df = new double[f.Length];
@@ -413,8 +420,10 @@ namespace ConsoleApplication1.Optimization
         /// <param name="parameterIndex">Vector of indices for the independent variables at descending derivative orders.</param>
         /// <param name="order">Highest derivative order.</param>
         /// <returns>Function handle that evaluates the fixed mixed partial derivative of input function at fixed order.</returns>
-        public Func<Vector, double> CreateMixedPartialDerivativeFunctionHandle(Func<Vector, double> f,
-                                                                                 int[] parameterIndex, int order)
+        public Func<double[], double> CreateMixedPartialDerivativeFunctionHandle(
+            Func<double[], double> f,
+            int[] parameterIndex,
+            int order)
         {
             return x => EvaluateMixedPartialDerivative(f, x, parameterIndex, order);
         }
@@ -426,8 +435,10 @@ namespace ConsoleApplication1.Optimization
         /// <param name="parameterIndex">Vector of indices for the independent variables at descending derivative orders.</param>
         /// <param name="order">Highest derivative order.</param>
         /// <returns>Function handle that evaluates the fixed mixed partial derivative of input function at fixed order.</returns>
-        public Func<Vector, double[]> CreateMixedPartialDerivativeFunctionHandle(Func<Vector, double>[] f,
-                                                                                 int[] parameterIndex, int order)
+        public Func<double[], double[]> CreateMixedPartialDerivativeFunctionHandle(
+            Func<double[], double>[] f,
+            int[] parameterIndex,
+            int order)
         {
             return x => EvaluateMixedPartialDerivative(f, x, parameterIndex, order);
         }

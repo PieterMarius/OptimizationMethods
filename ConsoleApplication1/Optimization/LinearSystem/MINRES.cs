@@ -9,45 +9,52 @@ namespace ConsoleApplication1.Optimization.LinearSystem
         private const double precisionConst = 1E-25;
 
         public double Precision { get; private set; }
+        public bool CheckSymmetry { get; private set; }
 
         #endregion
 
         #region Constructor
 
         public MINRES(
-            double precision)
+            double precision,
+            bool checkSymmetry)
         {
             Precision = precision;
+            CheckSymmetry = checkSymmetry;
         }
 
         public MINRES()
-            : this(precisionConst)
+            : this(precisionConst, true)
         { }
 
         #endregion
 
         #region Public Methods
 
-        public Vector Solve(
-            Vector[] A,
-            Vector b,
-            Vector startX,
+        public MinVector Solve(
+            MinVector[] A,
+            MinVector b,
+            MinVector startX,
             int nIter)
         {
-            Vector[] symmA = A;
-            Vector normb = b;
-            Vector[] At = Vector.Transpose(A);
+            MinVector[] symmA = A;
+            MinVector normb = b;
 
             //Symmetrize matrix
-            if (!Vector.Equals(A, At))
+            if (CheckSymmetry)
             {
-                symmA = Vector.Mult(At, A);
-                normb = Vector.Mult(At, b);
+                MinVector[] At = MinVector.Transpose(A);
+
+                if (!MinVector.Equals(A, At))
+                {
+                    symmA = MinVector.Mult(At, A);
+                    normb = MinVector.Mult(At, b);
+                }
             }
 
-            Vector v0 = new Vector(b.Count());
-            Vector v1 = normb - Vector.Mult(symmA, startX);
-           
+            MinVector v0 = new MinVector(b.Count);
+            MinVector v1 = normb - MinVector.Mult(symmA, startX);
+
             double beta1 = v1.Length();
             double betaN = 0.0;
             double n = beta1;
@@ -55,15 +62,15 @@ namespace ConsoleApplication1.Optimization.LinearSystem
             double c1 = 1.0;
             double s0 = 0.0;
             double s1 = 0.0;
-            Vector w0 = new Vector(v1.Count());
-            Vector w_1 = new Vector(v1.Count());
-            Vector x = new Vector(startX);
-            
+            MinVector w0 = new MinVector(v1.Count);
+            MinVector w_1 = new MinVector(v1.Count);
+            MinVector x = new MinVector(startX);
+
             for (int i = 0; i < nIter; i++)
             {
                 //Calculate Lanczos Vectors
-                Vector v = (1.0 / beta1) * v1;
-                Vector Av = Vector.Mult(symmA, v);
+                MinVector v = (1.0 / beta1) * v1;
+                MinVector Av = MinVector.Mult(symmA, v);
                 double alpha = v * Av;
                 v1 = Av - alpha * v - beta1 * v0;
                 betaN = v1.Length();
@@ -82,7 +89,7 @@ namespace ConsoleApplication1.Optimization.LinearSystem
                 s1 = betaN / p1;
 
                 //Update Solution
-                Vector w = (1.0 / p1) * (v - p3 * w_1 - p2 * w0);
+                MinVector w = (1.0 / p1) * (v - p3 * w_1 - p2 * w0);
 
                 x = x + c1 * n * w;
                 n = -s1 * n;

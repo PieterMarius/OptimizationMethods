@@ -27,25 +27,25 @@ namespace ConsoleApplication1.Optimization.LinearSystem
 
         #region Public Methods
 
-        public Vector Solve(
-            Vector[] A,
-            Vector b,
-            Vector startX,
+        public MinVector Solve(
+            MinVector[] A,
+            MinVector b,
+            MinVector startX,
             int nIter)
         {
-            Vector[] normA = A;
-            Vector normb = b;
+            MinVector[] normA = A;
+            MinVector normb = b;
 
-            if (!Vector.Equals(A, Vector.Transpose(A)))
+            if (!MinVector.Equals(A, MinVector.Transpose(A)))
             {
-                Vector[] At = Vector.Transpose(A);
-                normA = Vector.Mult(At, A);
-                normb = Vector.Mult(At, b);
+                MinVector[] At = MinVector.Transpose(A);
+                normA = MinVector.Mult(At, A);
+                normb = MinVector.Mult(At, b);
             }
             
-            Vector rNew = normb - Vector.Mult(normA, startX);
-            Vector p = rNew;
-            Vector x = new Vector(startX.Vars);
+            MinVector rNew = normb - MinVector.Mult(normA, startX);
+            MinVector p = rNew;
+            MinVector x = new MinVector(startX);
             double r2Old = rNew * rNew;
 
             double alpha = 1.0;
@@ -57,7 +57,7 @@ namespace ConsoleApplication1.Optimization.LinearSystem
 
                 x = x + alpha * p;
 
-                rNew = rNew - alpha * Vector.Mult(normA, p);
+                rNew = rNew - alpha * MinVector.Mult(normA, p);
 
                 double r2New = rNew * rNew;
 
@@ -79,11 +79,11 @@ namespace ConsoleApplication1.Optimization.LinearSystem
         #region Private Methods
 
         public double GetAlpha(
-            Vector[] A,
-            Vector p,
+            MinVector[] A,
+            MinVector p,
             double num)
         {
-            var denom = p * Vector.Mult(A, p);
+            var denom = p * MinVector.Mult(A, p);
 
             if (denom == 0.0)
                 return 1.0;

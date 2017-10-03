@@ -69,13 +69,14 @@
     <Compile Include="Optimization\BFGSAlgorithm\BFGS.cs" />
     <Compile Include="Optimization\LinearSystem\CGMethod.cs" />
     <Compile Include="Optimization\LinearSystem\MINRES.cs" />
+    <Compile Include="Optimization\LinearSystem\StrongWolfeLineSearch.cs" />
     <Compile Include="Optimization\SequentialQuadraticProgramming\InequalityContraintProperties.cs" />
     <Compile Include="Optimization\NumericalDerivative.cs" />
     <Compile Include="Optimization\OptimizationHelper.cs" />
     <Compile Include="Optimization\NonLinearConjugateGradient\NLCG.cs" />
     <Compile Include="Optimization\SequentialQuadraticProgramming\SQP.cs" />
     <Compile Include="Optimization\SteepestDescentMethod\SteepestDescent.cs" />
-    <Compile Include="Optimization\Vector.cs" />
+    <Compile Include="Optimization\MinVector.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestSQP.cs" />

@@ -11,18 +11,18 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
-                return Math.Pow(x.Vars[0], 2) +
-                       Math.Pow(x.Vars[1], 2);
+                return Math.Pow(x[0], 2) +
+                       Math.Pow(x[1], 2);
             };
 
-            List<Func<Vector, double>> eqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> eqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> eqConstraint1 = (x) =>
+            Func<double[], double> eqConstraint1 = (x) =>
             {
-                return -x.Vars[0] -
-                       x.Vars[1] + 2;
+                return -x[0] -
+                       x[1] + 2;
             };
 
             eqConstraint.Add(eqConstraint1);
@@ -34,18 +34,18 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
-                return Math.Pow(x.Vars[0] - 1, 2) +
-                       Math.Pow(x.Vars[1] - 3, 2);
+                return Math.Pow(x[0] - 1, 2) +
+                       Math.Pow(x[1] - 3, 2);
             };
 
-            List<Func<Vector, double>> eqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> eqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> eqConstraint1 = (x) =>
+            Func<double[], double> eqConstraint1 = (x) =>
             {
-                return -x.Vars[0] +
-                       Math.Pow(x.Vars[1], 2) - 1;
+                return -x[0] +
+                       Math.Pow(x[1], 2) - 1;
             };
 
             eqConstraint.Add(eqConstraint1);
@@ -60,18 +60,18 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
-                return -(5 - Math.Pow(x.Vars[0] - 2, 2) -
-                       2 * Math.Pow(x.Vars[1] - 1, 2));
+                return -(5 - Math.Pow(x[0] - 2, 2) -
+                       2 * Math.Pow(x[1] - 1, 2));
             };
 
-            List<Func<Vector, double>> eqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> eqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> eqConstraint1 = (x) =>
+            Func<double[], double> eqConstraint1 = (x) =>
             {
-                return -x.Vars[0] -
-                       4 * x.Vars[1] + 3;
+                return -x[0] -
+                       4 * x[1] + 3;
             };
 
             eqConstraint.Add(eqConstraint1);
@@ -86,21 +86,21 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
-                return x.Vars[0] + x.Vars[1] + Math.Pow(x.Vars[2], 2);
+                return x[0] + x[1] + Math.Pow(x[2], 2);
             };
 
-            List<Func<Vector, double>> eqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> eqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> eqConstraint1 = (x) =>
+            Func<double[], double> eqConstraint1 = (x) =>
             {
-                return x.Vars[0] - 1;
+                return x[0] - 1;
             };
 
-            Func<Vector, double> eqConstraint2 = (x) =>
+            Func<double[], double> eqConstraint2 = (x) =>
             {
-                return Math.Pow(x.Vars[0], 2) + Math.Pow(x.Vars[1], 2) - 1;
+                return Math.Pow(x[0], 2) + Math.Pow(x[1], 2) - 1;
             };
 
             eqConstraint.Add(eqConstraint1);
@@ -113,26 +113,26 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
 
-                return 400 * Math.Pow(x.Vars[0], 2) +
-                       800 * Math.Pow(x.Vars[1], 2) +
-                       200 * x.Vars[0] * x.Vars[1] +
-                       1600 * Math.Pow(x.Vars[2], 2) +
-                       400 * x.Vars[1] * x.Vars[2];
+                return 400 * Math.Pow(x[0], 2) +
+                       800 * Math.Pow(x[1], 2) +
+                       200 * x[0] * x[1] +
+                       1600 * Math.Pow(x[2], 2) +
+                       400 * x[1] * x[2];
             };
 
-            List<Func<Vector, double>> eqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> eqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> eqConstraint1 = (x) =>
+            Func<double[], double> eqConstraint1 = (x) =>
             {
-                return 1.2 - x.Vars[0] - x.Vars[1] - 1.5 * x.Vars[2];
+                return 1.2 - x[0] - x[1] - 1.5 * x[2];
             };
 
-            Func<Vector, double> eqConstraint2 = (x) =>
+            Func<double[], double> eqConstraint2 = (x) =>
             {
-                return 1.0 - x.Vars[0] - x.Vars[1] - x.Vars[2];
+                return 1.0 - x[0] - x[1] - x[2];
             };
 
             eqConstraint.Add(eqConstraint2);
@@ -145,21 +145,21 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
 
                 return Math.Pow(x[0] - 2, 2) +
                        2 * Math.Pow(x[1] - 1, 2);
             };
 
-            List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> inqConstraint1 = (x) =>
+            Func<double[], double> inqConstraint1 = (x) =>
             {
                 return 3 - x[0] - 4 * x[1];
             };
 
-            Func<Vector, double> inqConstraint2 = (x) =>
+            Func<double[], double> inqConstraint2 = (x) =>
             {
                 return x[0] - x[1];
             };
@@ -177,20 +177,20 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
 
                 return -(x[0] * (30 - x[0]) + x[1] * (50 - 2 * x[1]) - 3 * x[0] - 5 * x[1] - 10 * x[2]);
             };
 
-            List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> inqConstraint1 = (x) =>
+            Func<double[], double> inqConstraint1 = (x) =>
             {
                 return x[0] + x[1] - x[2];
             };
 
-            Func<Vector, double> inqConstraint2 = (x) =>
+            Func<double[], double> inqConstraint2 = (x) =>
             {
                 return x[2] - 17.25;
             };
@@ -208,20 +208,20 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
 
                 return -(Math.Sin(x[0]) * Math.Cos(x[1]) + Math.Cos(x[0]) * Math.Sin(x[1]));
             };
 
-            List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> inqConstraint1 = (x) =>
+            Func<double[], double> inqConstraint1 = (x) =>
             {
                 return -x[0] - x[1];
             };
 
-            Func<Vector, double> inqConstraint2 = (x) =>
+            Func<double[], double> inqConstraint2 = (x) =>
             {
                 return x[0] + x[1] - Math.PI;
             };
@@ -229,9 +229,9 @@ namespace ConsoleApplication1
             inqConstraint.Add(inqConstraint1);
             inqConstraint.Add(inqConstraint2);
 
-            List<Func<Vector, double>> eqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> eqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> eqConstraint1 = (x) =>
+            Func<double[], double> eqConstraint1 = (x) =>
             {
                 return x[0] - Math.Pow(x[1], 3);
             };
@@ -248,15 +248,15 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
 
                 return x[0] + x[1];
             };
 
-            List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> inqConstraint1 = (x) =>
+            Func<double[], double> inqConstraint1 = (x) =>
             {
                 return -2 + Math.Pow(x[0], 2) + Math.Pow(x[1], 2);
             };
@@ -274,24 +274,24 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
 
                 return Math.Pow(1 - x[0], 2) + 100 * Math.Pow(x[1] - Math.Pow(x[0], 2), 2);
             };
 
-            List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> inqConstraint1 = (x) =>
+            Func<double[], double> inqConstraint1 = (x) =>
             {
                 return x[0] + 2 * x[1] - 1;
             };
 
             inqConstraint.Add(inqConstraint1);
 
-            List<Func<Vector, double>> eqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> eqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> eqConstraint1 = (x) =>
+            Func<double[], double> eqConstraint1 = (x) =>
             {
                 return 2 * x[0] + x[1] - 1;
             };
@@ -308,31 +308,31 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
 
                 return 1 + x[0] / (1 + x[1]) - 3 * x[0] * x[1] + x[1] * (1 + x[0]);
             };
 
-            List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> inqConstraint1 = (x) =>
+            Func<double[], double> inqConstraint1 = (x) =>
             {
                 return x[0] - 1;
             };
 
-            Func<Vector, double> inqConstraint2 = (x) =>
+            Func<double[], double> inqConstraint2 = (x) =>
             {
                 return x[1] - 2;
             };
 
-            Func<Vector, double> inqConstraint3 = (x) =>
+            Func<double[], double> inqConstraint3 = (x) =>
             {
                 return -x[0];
             };
 
 
-            Func<Vector, double> inqConstraint4 = (x) =>
+            Func<double[], double> inqConstraint4 = (x) =>
             {
                 return -x[1];
             };
@@ -354,15 +354,15 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
 
                 return Math.Pow(1.0 - x[0], 2) + 100.0 * Math.Pow(x[1] - Math.Pow(x[0], 2), 2);
             };
 
-            List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> eqConstraint1 = (x) =>
+            Func<double[], double> eqConstraint1 = (x) =>
             {
                 return Math.Pow(x[0] - (1.0 / 3.0), 2) + Math.Pow(x[1] - (1.0 / 3.0), 2) - Math.Pow(1.0 / 3.0, 2);
             };
@@ -394,8 +394,8 @@ namespace ConsoleApplication1
             //inqConstraint.Add(inqConstraint4);
 
 
-            Vector upperBound = new Vector(new double[] { 0.5, 0.8 });
-            Vector lowerBound = new Vector(new double[] { 0.0, 0.2 });
+            double[] upperBound = new double[] { 0.5, 0.8 };
+            double[] lowerBound = new double[] { 0.0, 0.2 };
             
             var res = quadraticProgramming.Minimize(f, null, inqConstraint, lowerBound, upperBound, new double[] { 0.25, 0.25 }, 1000);
         }
@@ -408,35 +408,35 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
 
                 return Math.Pow(x[0] - 1.0, 2) + Math.Pow(x[1] - 2.5, 2);
             };
 
-            List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> inqConstraint1 = (x) =>
+            Func<double[], double> inqConstraint1 = (x) =>
             {
                 return -x[0] + 2 * x[1] - 2.0;
             };
 
-            Func<Vector, double> inqConstraint2 = (x) =>
+            Func<double[], double> inqConstraint2 = (x) =>
             {
                 return x[0] + x[1] - 6.0;
             };
 
-            Func<Vector, double> inqConstraint3 = (x) =>
+            Func<double[], double> inqConstraint3 = (x) =>
             {
                 return x[0] - 2.0 * x[1] - 2.0;
             };
 
-            Func<Vector, double> inqConstraint4 = (x) =>
+            Func<double[], double> inqConstraint4 = (x) =>
             {
                 return -x[0];
             };
 
-            Func<Vector, double> inqConstraint5 = (x) =>
+            Func<double[], double> inqConstraint5 = (x) =>
             {
                 return -x[1];
             };
@@ -458,35 +458,35 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
 
                 return Math.Pow(1.0 - x[0], 2) + 100.0 * Math.Pow(x[1] - Math.Pow(x[0], 2), 2);
             };
 
-            List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> inqConstraint1 = (x) =>
+            Func<double[], double> inqConstraint1 = (x) =>
             {
                 return x[0] - 0.5;
             };
 
-            Func<Vector, double> inqConstraint2 = (x) =>
+            Func<double[], double> inqConstraint2 = (x) =>
             {
                 return x[1] - 0.8;
             };
 
-            Func<Vector, double> inqConstraint3 = (x) =>
+            Func<double[], double> inqConstraint3 = (x) =>
             {
                 return -x[0];
             };
 
-            Func<Vector, double> inqConstraint4 = (x) =>
+            Func<double[], double> inqConstraint4 = (x) =>
             {
                 return -x[1] + 0.2;
             };
 
-            Func<Vector, double> eqConstraint1 = (x) =>
+            Func<double[], double> eqConstraint1 = (x) =>
             {
                 return Math.Pow(x[0] - (1.0 / 3.0), 2) + Math.Pow(x[1] - (1.0 / 3.0), 2) - Math.Pow(1.0 / 3.0, 2);
             };
@@ -507,15 +507,15 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
 
                 return Math.Pow(1.0 - x[0], 2) + 100.0 * Math.Pow(x[1] - Math.Pow(x[0], 2), 2);
             };
 
-            List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> eqConstraint1 = (x) =>
+            Func<double[], double> eqConstraint1 = (x) =>
             {
                 return Math.Pow(x[0], 2) + Math.Pow(x[1], 2) - 1;
             };
@@ -529,24 +529,24 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
 
                 return -(2 * x[0] * x[1] + 2 * x[0] - Math.Pow(x[0], 2) - 2 * Math.Pow(x[1], 2));
             };
 
-            List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> inqConstraint1 = (x) =>
+            Func<double[], double> inqConstraint1 = (x) =>
             {
                 return -x[1] + 1.0;
             };
 
             inqConstraint.Add(inqConstraint1);
 
-            List<Func<Vector, double>> eqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> eqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> eqConstraint1 = (x) =>
+            Func<double[], double> eqConstraint1 = (x) =>
             {
                 return Math.Pow(x[0], 3) - x[1];
             };
@@ -564,34 +564,34 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
                 return 0.01 * Math.Pow(x[0], 2) + Math.Pow(x[1], 2) - 100.0;
             };
 
-            List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> inqConstraint1 = (x) =>
+            Func<double[], double> inqConstraint1 = (x) =>
             {
                 return x[0] - 50;
             };
 
-            Func<Vector, double> inqConstraint2 = (x) =>
+            Func<double[], double> inqConstraint2 = (x) =>
             {
                 return x[1] - 50;
             };
 
-            Func<Vector, double> inqConstraint3 = (x) =>
+            Func<double[], double> inqConstraint3 = (x) =>
             {
                 return -x[0] + 2.0;
             };
 
-            Func<Vector, double> inqConstraint4 = (x) =>
+            Func<double[], double> inqConstraint4 = (x) =>
             {
                 return -x[1] - 50;
             };
 
-            Func<Vector, double> inqConstraint5 = (x) =>
+            Func<double[], double> inqConstraint5 = (x) =>
             {
                 return -10 * x[0] + x[1] + 10.0;
             };
@@ -612,15 +612,15 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
 
                 return Math.Pow(1.0 - x[0], 2) + 100.0 * Math.Pow(x[1] - Math.Pow(x[0], 2), 2);
             };
 
-            List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
 
-            Func<Vector, double> eqConstraint1 = (x) =>
+            Func<double[], double> eqConstraint1 = (x) =>
             {
                 return Math.Pow(x[0], 2) + Math.Pow(x[1], 2) - 1.5;
             };
@@ -634,14 +634,14 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
 
                 return Math.Pow(x[0], 2) + Math.Pow(x[1], 2) + Math.Pow(x[2], 2);
             };
             //−x1 − x2 exp (x3y) − exp(2y) + 2 exp(4y) ≥ 0 for all y ∈ [0, 1]
 
-            List <Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+            List <Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
 
 
             int nConstraints = 100;
@@ -654,7 +654,7 @@ namespace ConsoleApplication1
 
                 double inner = -aStep;
 
-                Func<Vector, double> eqConstraint1 = (x) =>
+                Func<double[], double> eqConstraint1 = (x) =>
                 {
                     return x[0] + x[1] * Math.Exp(x[2] * inner) + Math.Exp(2 * inner) - 2 * Math.Exp(4 * inner);
                 };
@@ -673,26 +673,26 @@ namespace ConsoleApplication1
         {
             SQP quadraticProgramming = new SQP();
 
-            Func<Vector, double> f = (x) =>
+            Func<double[], double> f = (x) =>
             {
 
                 return Math.Pow(x[0], 4) + Math.Pow(x[1], 4);
             };
             
 
-            List<Func<Vector, double>> inqConstraint = new List<Func<Vector, double>>();
+            List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
             
-            Func<Vector, double> eqConstraint1 = (x) =>
+            Func<double[], double> eqConstraint1 = (x) =>
             {
                 return Math.Pow(x[0],2) - x[0] - x[1] + 1;
             };
 
-            Func<Vector, double> eqConstraint2 = (x) =>
+            Func<double[], double> eqConstraint2 = (x) =>
             {
                 return Math.Pow(x[0], 2) - 4 * x[0] - x[1] + 6;
             };
 
-            Func<Vector, double> eqConstraint3 = (x) =>
+            Func<double[], double> eqConstraint3 = (x) =>
             {
                 return Math.Pow(x[0], 2) - 3 * x[0] + x[1] - 2;
             };
