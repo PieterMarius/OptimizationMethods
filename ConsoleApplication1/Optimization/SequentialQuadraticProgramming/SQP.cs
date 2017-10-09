@@ -12,6 +12,8 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
         private const double precisionConst = 1E-16;
         private const double lambda = 0.5;
         private const double inequalityConstraintTol = 1E-10;
+        private const double epsilonNw = 0;
+        private const double epsilonSe = 0;
 
         private readonly OptimizationNumericalDerivative numericalDerivative;
         private readonly MINRES linearSolver;
@@ -447,6 +449,8 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
 
             MinVector[] bufHessian = new MinVector[lagrangianHessian.Length];
 
+            MinVector[] modifiedLagrangian = MinVector.Sum(lagrangianHessian, epsilonNw);
+
             Array.Copy(lagrangianHessian, bufHessian, lagrangianHessian.Length);
 
             for (int i = 0; i < bufHessian.Length; i++)
@@ -463,7 +467,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
 
             foreach (var item in constraintDerivative)
             {
-                var res = MinVector.Add(item, new MinVector(constraintDerivative.Count));
+                var res = MinVector.Add(item, new MinVector(constraintDerivative.Count, -epsilonSe));
                 lagrangianList.Add(res);
             }
 

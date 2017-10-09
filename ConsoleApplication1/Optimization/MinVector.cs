@@ -31,6 +31,14 @@ namespace ConsoleApplication1.Optimization
             minArray = new double[dim];
         }
 
+        public MinVector(int dim, double value)
+        {
+            minArray = new double[dim];
+
+            for (int i = 0; i < minArray.Length; i++)
+                minArray[i] = value;
+        }
+
         public bool IsNull()
         {
             if (minArray != null)
@@ -318,6 +326,17 @@ namespace ConsoleApplication1.Optimization
             for (int i = 0; i < a.Length; i++)
             {
                 result[i] = a[i] + b[i];
+            }
+
+            return result;
+        }
+
+        public static MinVector[] Sum(MinVector[] a, double b)
+        {
+            MinVector[] result = new MinVector[a.Length];
+            for (int i = 0; i < a.Length; i++)
+            {
+                result[i] = a[i] + b;
             }
 
             return result;
