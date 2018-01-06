@@ -97,15 +97,18 @@ namespace ConsoleApplication1
             //TestsSQP.Test8();
             //TestsSQP.Test9();
             //TestsSQP.Test10();
-            TestsSQP.Test11();
-            TestsSQP.Test12();
-            TestsSQP.Test13();
-            TestsSQP.Test14();
-            TestsSQP.Test15();
-            TestsSQP.Test16();
-            TestsSQP.Test17();
+            //TestsSQP.Test11();
+            //TestsSQP.Test12();
+            //TestsSQP.Test13();
+            //TestsSQP.Test14();
+            //TestsSQP.Test15();
+            //TestsSQP.Test16();
+            //TestsSQP.Test17();
             //TestsSQP.Test18();
-            TestsSQP.Test19();
+            //TestsSQP.Test19();
+            //TestsSQP.Test20();
+            //TestsSQP.Test21();
+            TestsSQP.Test22();
             //TestCGMethod();
 
             BFGS bfsg = new BFGS();

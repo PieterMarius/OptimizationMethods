@@ -8,6 +8,8 @@ namespace ConsoleApplication1.Optimization.LinearSystem
 
         private const double precisionConst = 1E-25;
 
+        private double residual = double.NaN;
+
         public double Precision { get; private set; }
         public bool CheckSymmetry { get; private set; }
 
@@ -33,6 +35,7 @@ namespace ConsoleApplication1.Optimization.LinearSystem
 
         public MinVector Solve(
             MinVector[] A,
+            
             MinVector b,
             MinVector startX,
             int nIter)
@@ -52,8 +55,10 @@ namespace ConsoleApplication1.Optimization.LinearSystem
                 }
             }
 
+            
+
             MinVector v0 = new MinVector(b.Count);
-            MinVector v1 = normb - MinVector.Mult(symmA, startX);
+            MinVector v1 =  normb - MinVector.Mult(symmA, startX);
 
             double beta1 = v1.Length();
             double betaN = 0.0;
@@ -70,7 +75,7 @@ namespace ConsoleApplication1.Optimization.LinearSystem
             {
                 //Calculate Lanczos Vectors
                 MinVector v = (1.0 / beta1) * v1;
-                MinVector Av = MinVector.Mult(symmA, v);
+                MinVector Av =  MinVector.Mult(symmA, v);
                 double alpha = v * Av;
                 v1 = Av - alpha * v - beta1 * v0;
                 betaN = v1.Length();
@@ -94,7 +99,9 @@ namespace ConsoleApplication1.Optimization.LinearSystem
                 x = x + c1 * n * w;
                 n = -s1 * n;
 
-                if (Math.Abs(n) < precisionConst)
+                residual = Math.Abs(n);
+
+                if (residual < precisionConst)
                     break;
 
                 beta1 = betaN;
@@ -104,6 +111,11 @@ namespace ConsoleApplication1.Optimization.LinearSystem
             }
 
             return x;
+        }
+
+        public double GetResidual()
+        {
+            return residual;
         }
 
         #endregion

@@ -1,5 +1,6 @@
 ﻿using ConsoleApplication1.Optimization.SequentialQuadraticProgramming;
 using System;
+using System.Linq;
 
 namespace ConsoleApplication1.Optimization
 {
@@ -25,7 +26,7 @@ namespace ConsoleApplication1.Optimization
             double precision,
             bool earlyExit)
         {
-            numericalDerivative = new OptimizationNumericalDerivative(5, 2);
+            numericalDerivative = new OptimizationNumericalDerivative(13, 7);
             strongWolfeLineSearch = new StrongWolfeLineSearch();
             EarlyExit = earlyExit;
             Precision = precision;
@@ -55,11 +56,14 @@ namespace ConsoleApplication1.Optimization
 
             for (int i = 0; i < nIter; i++)
             {
-                StepSize = strongWolfeLineSearch.GetStepLength(f, direction, xOld, 20);
+                StepSize = strongWolfeLineSearch.GetStepLength(f, direction, xOld, 4.0);
 
                 MinVector sk = StepSize * direction;
 
                 xNew = xOld + sk;
+
+                if (xNew.MinArray.Contains(double.NaN))
+                    break;
 
                 if (EarlyExit && 
                     CheckEarlyExit(xNew, xOld))
@@ -68,7 +72,7 @@ namespace ConsoleApplication1.Optimization
                 derivativeNew = new MinVector(numericalDerivative.EvaluatePartialDerivative(f, xNew.MinArray, 1));
                 
                 MinVector yk = derivativeNew -
-                            derivativeOld;
+                               derivativeOld;
 
                 MinVector[] newInvHessian = GetApproximateInverseHessianMatrix(
                                                 oldInvHessian,
@@ -102,7 +106,7 @@ namespace ConsoleApplication1.Optimization
 
             for (int i = 0; i < nIter; i++)
             {
-                StepSize = strongWolfeLineSearch.GetStepLength(f, df, direction, xOld, 20);
+                StepSize = strongWolfeLineSearch.GetStepLength(f, df, direction, xOld, 5);
 
                 MinVector sk = StepSize * direction;
 

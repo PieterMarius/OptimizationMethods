@@ -6,7 +6,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
     {
         #region Private Fields
 
-        private OptimizationNumericalDerivative numericalDerivative = new OptimizationNumericalDerivative(5, 2);
+        private OptimizationNumericalDerivative numericalDerivative = new OptimizationNumericalDerivative(13, 7);
         private Random rnd = new Random();
         
         #endregion Private Fields
@@ -27,14 +27,14 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             MinVector x0,
             double alpham)
         {
-            int maxIter = 10;
+            int maxIter = 15;
 
             double alphap = 0;
 
             double c1 = 1E-4;
-            double c2 = 0.5;
+            double c2 = 0.7;
 
-            double alphax = alpham * 0.2;//rnd.NextDouble();
+            double alphax = alpham * 0.7;//rnd.NextDouble();
 
             double fx0 = f(x0.MinArray);
             double gx0 = new MinVector(numericalDerivative.EvaluatePartialDerivative(f, x0.MinArray, 1)) * d;
@@ -64,7 +64,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
                 fxp = fxx;
                 gxp = gxx;
 
-                double r = 0.2;//rnd.NextDouble();
+                double r = 0.7;//rnd.NextDouble();
 
                 alphax = alphax + (alpham - alphax) * r;
             }
@@ -79,7 +79,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             MinVector x0,
             double alpham)
         {
-            int maxIter = 5;
+            int maxIter = 10;
 
             double alphap = 0;
 
@@ -124,20 +124,25 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             return alphax;
         }
 
-        private static double Zoom(
+       
+
+        #endregion Public Methods
+
+        #region Private Methods
+
+        private double Zoom(
             Func<double[], double> f,
-            Func<double[], double>[] df,
             MinVector x0,
             MinVector d,
             double alphal,
             double alphah)
         {
-            int maxIter = 8;
+            int maxIter = 50;
             double c1 = 1E-4;
-            double c2 = 0.5;
+            double c2 = 0.7;
 
             double fx0 = f(x0.MinArray);
-            double gx0 = OptimizationHelper.Derivative(df, x0) * d;
+            double gx0 = new MinVector(numericalDerivative.EvaluatePartialDerivative(f, x0.MinArray, 1)) * d;
 
             double alphax = 0.0;
 
@@ -146,7 +151,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
                 alphax = 0.5 * (alphal + alphah);
                 MinVector xx = x0 + alphax * d;
                 double fxx = f(xx.MinArray);
-                double gxx = OptimizationHelper.Derivative(df, xx) * d;
+                double gxx = new MinVector(numericalDerivative.EvaluatePartialDerivative(f, xx.MinArray,1)) * d;
                 MinVector xl = x0 + alphal * d;
                 double fxl = f(xl.MinArray);
 
@@ -167,23 +172,20 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             return alphax;
         }
 
-        #endregion Public Methods
-
-        #region Private Methods
-
-        private double Zoom(
-            Func<double[], double> f,
-            MinVector x0,
-            MinVector d,
-            double alphal,
-            double alphah)
+        private static double Zoom(
+           Func<double[], double> f,
+           Func<double[], double>[] df,
+           MinVector x0,
+           MinVector d,
+           double alphal,
+           double alphah)
         {
-            int maxIter = 6;
+            int maxIter = 10;
             double c1 = 1E-4;
             double c2 = 0.5;
 
             double fx0 = f(x0.MinArray);
-            double gx0 = new MinVector(numericalDerivative.EvaluatePartialDerivative(f, x0.MinArray, 1)) * d;
+            double gx0 = OptimizationHelper.Derivative(df, x0) * d;
 
             double alphax = 0.0;
 
@@ -192,7 +194,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
                 alphax = 0.5 * (alphal + alphah);
                 MinVector xx = x0 + alphax * d;
                 double fxx = f(xx.MinArray);
-                double gxx = new MinVector(numericalDerivative.EvaluatePartialDerivative(f, xx.MinArray,1)) * d;
+                double gxx = OptimizationHelper.Derivative(df, xx) * d;
                 MinVector xl = x0 + alphal * d;
                 double fxl = f(xl.MinArray);
 

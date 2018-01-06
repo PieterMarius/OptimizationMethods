@@ -295,6 +295,55 @@ namespace ConsoleApplication1.Optimization
             return result;
         }
 
+        public static MinVector[] InvertDiag(MinVector[] a)
+        {
+            MinVector[] result = new MinVector[a.Length];
+            for (int i = 0; i < a.Length; i++)
+            {
+                result[i] = new MinVector(a.Length);
+                if (a[i][i] != 0.0)
+                    result[i][i] = 1.0 / a[i][i];
+                else
+                    result[i][i] = 0.0;
+            }
+
+            return result;
+        }
+
+        public static MinVector[] IncompleteCholesky(MinVector[] a)
+        {
+            MinVector[] result = new MinVector[a.Length];
+
+            for (int i = 0; i < a.Length; i++)
+            {
+                result[i] = new MinVector(a.Length);
+            }
+
+            for (int i = 0; i < a.Length; i++)
+            {
+                double sum = 0.0;
+                for (int k = 0; k < i - 1; k++)
+                {
+                    sum = a[i][k] * a[i][k];
+                }
+
+                result[i][i] = Math.Sqrt(a[i][i] - sum);
+
+                for (int j = i + 1; j < a.Length; j++)
+                {
+                    sum = 0.0;
+                    for (int k = 0; k < i - 1; k++)
+                    {
+                        sum = a[i][k] * a[j][k];
+                    }
+                    if(result[i][i] != 0.0)
+                        result[j][i] = (1.0 / result[i][i]) * (a[j][i] - sum);
+                }
+            }
+
+            return result;
+        }
+
         public static MinVector Abs(MinVector a)
         {
             double[] result = new double[a.minArray.Length];

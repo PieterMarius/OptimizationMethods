@@ -76,7 +76,10 @@ namespace ConsoleApplication1
 
             eqConstraint.Add(eqConstraint1);
 
-            var res = quadraticProgramming.Minimize(f, eqConstraint, null, new double[] { 0, 0 }, 50);
+            var res = quadraticProgramming.Minimize(f, eqConstraint, null, new double[] { 0, 0 }, 100);
+
+            double viol = eqConstraint1(res);
+            double viol1 = eqConstraint1(new double[] { 5.0 / 3.0, 1.0 / 3.0 });
         }
 
         /// <summary>
@@ -106,7 +109,7 @@ namespace ConsoleApplication1
             eqConstraint.Add(eqConstraint1);
             eqConstraint.Add(eqConstraint2);
 
-            var res = quadraticProgramming.Minimize(f, eqConstraint, null, new double[] { 0, 0, 0 }, 1000);
+            var res = quadraticProgramming.Minimize(f, eqConstraint, null, new double[] { 0.1, 0.1, 0.1 }, 1000);
         }
 
         public static void Test4()
@@ -238,7 +241,7 @@ namespace ConsoleApplication1
 
             eqConstraint.Add(eqConstraint1);
 
-            var res = quadraticProgramming.Minimize(f, eqConstraint, inqConstraint, new double[] { 0, 0 }, 100);
+            var res = quadraticProgramming.Minimize(f, eqConstraint, inqConstraint, new double[] { 0.0, 0.0 }, 1000);
         }
 
         /// <summary>
@@ -263,7 +266,7 @@ namespace ConsoleApplication1
 
             inqConstraint.Add(inqConstraint1);
 
-            var res = quadraticProgramming.Minimize(f, null, inqConstraint, new double[] { 0, 0 }, 100);
+            var res = quadraticProgramming.Minimize(f, null, inqConstraint, new double[] { 0, 0 }, 1000);
         }
 
 
@@ -396,7 +399,7 @@ namespace ConsoleApplication1
 
             double[] upperBound = new double[] { 0.5, 0.8 };
             double[] lowerBound = new double[] { 0.0, 0.2 };
-            
+
             var res = quadraticProgramming.Minimize(f, null, inqConstraint, lowerBound, upperBound, new double[] { 0.25, 0.25 }, 1000);
         }
 
@@ -496,7 +499,7 @@ namespace ConsoleApplication1
             inqConstraint.Add(eqConstraint1);
             inqConstraint.Add(inqConstraint3);
             inqConstraint.Add(inqConstraint4);
-            
+
             var res = quadraticProgramming.Minimize(f, null, inqConstraint, new double[] { 0.25, 0.25 }, 1000);
         }
 
@@ -522,7 +525,13 @@ namespace ConsoleApplication1
 
             inqConstraint.Add(eqConstraint1);
 
-            var res = quadraticProgramming.Minimize(f, null, inqConstraint, new double[] { 0.0, 0.0 }, 100);
+            var res = quadraticProgramming.Minimize(f, null, inqConstraint, new double[] { 0.0, 0.0 }, 1000);
+
+            double min = f(res);
+            double eqc = eqConstraint1(res);
+
+            double min1 = f(new double[] { 0.7864, 0.6177 });
+            double eqc2 = eqConstraint1(new double[] { 0.7864, 0.6177 });
         }
 
         public static void Test15()
@@ -553,7 +562,7 @@ namespace ConsoleApplication1
 
             eqConstraint.Add(eqConstraint1);
 
-            var res = quadraticProgramming.Minimize(f, eqConstraint, inqConstraint, new double[] { 0.0, 0.0 }, 100);
+            var res = quadraticProgramming.Minimize(f, eqConstraint, inqConstraint, new double[] { 0.0, 0.0 }, 1000);
         }
 
 
@@ -627,7 +636,13 @@ namespace ConsoleApplication1
 
             inqConstraint.Add(eqConstraint1);
 
-            var res = quadraticProgramming.Minimize(f, null, inqConstraint, new double[] { 1.0, -0.5 }, 100);
+            var res = quadraticProgramming.Minimize(f, null, inqConstraint, new double[] { 1.0, -0.5 }, 200);
+
+            double test = eqConstraint1(res);
+            double min = f(res);
+
+            double test1 = eqConstraint1(new double[] { 0.9072, 0.8228 });
+            double min1 = f(new double[] { 0.9072, 0.8228 });
         }
 
         public static void Test18()
@@ -641,7 +656,7 @@ namespace ConsoleApplication1
             };
             //−x1 − x2 exp (x3y) − exp(2y) + 2 exp(4y) ≥ 0 for all y ∈ [0, 1]
 
-            List <Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
+            List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
 
 
             int nConstraints = 100;
@@ -660,10 +675,24 @@ namespace ConsoleApplication1
                 };
 
                 inqConstraint.Add(eqConstraint1);
+                //bool tt = false;
+                //if (eqConstraint1(new double[] { 1.0, -1.0, 2.0 }) > 0.0)
+                //    tt = true;
             }
-                      
 
-            var res = quadraticProgramming.Minimize(f, null, inqConstraint, new double[] { 1.0, -1.0, 2.0}, 10000);
+            double min = f(new double[] { 1.0, -1.0, 2.0 });
+
+            var res = quadraticProgramming.Minimize(f, null, inqConstraint, new double[] { 1.0, -1.0, 2.0 }, 30000);
+
+            double min1 = f(res);
+
+            foreach (var func in inqConstraint)
+            {
+                double test = func(res);
+                var t = false;
+                if (test > 0)
+                    t = true;
+            }
         }
 
         /// <summary>
@@ -678,13 +707,13 @@ namespace ConsoleApplication1
 
                 return Math.Pow(x[0], 4) + Math.Pow(x[1], 4);
             };
-            
+
 
             List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
-            
+
             Func<double[], double> eqConstraint1 = (x) =>
             {
-                return Math.Pow(x[0],2) - x[0] - x[1] + 1;
+                return Math.Pow(x[0], 2) - x[0] - x[1] + 1;
             };
 
             Func<double[], double> eqConstraint2 = (x) =>
@@ -701,9 +730,182 @@ namespace ConsoleApplication1
             inqConstraint.Add(eqConstraint2);
             inqConstraint.Add(eqConstraint3);
 
-            var res = quadraticProgramming.Minimize(f, null, inqConstraint, new double[] { - 4.0, -4.0 }, 10000);
+            foreach (var func in inqConstraint)
+            {
+                double test = func(new double[] { 1.66667, 2.11111 });
+            }
+
+            var res = quadraticProgramming.Minimize(f, null, inqConstraint, new double[] { -4.0, -4.0 }, 10000);
         }
 
+        public static void Test20()
+        {
+            SQP quadraticProgramming = new SQP();
 
+            int nVar = 16;
+
+            Func<double[], double> f = (x) =>
+            {
+                double sum = 0.0;
+                for (int i = 0; i < nVar - 1; i++)
+                {
+                    sum += 100.0 * Math.Pow(x[i + 1] - x[i] * x[i], 2) + Math.Pow(x[i] - 1.0, 2);
+                }
+                return 0.5 * sum;
+            };
+
+            List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
+
+            Func<double[], double> inqConstr = (x) =>
+            {
+                double sum = 0.0;
+                for (int i = 0; i < nVar - 1; i++)
+                {
+                    sum += 1.1 - Math.Pow(x[i] - 2.0, 3) - x[i + 1];
+                }
+                return -sum;
+            };
+
+            inqConstraint.Add(inqConstr);
+
+            double[] startValue = new double[nVar];
+            startValue[0] = 4.0;
+            for (int i = 1; i < nVar; i++)
+            {
+                startValue[i] = 4.0;
+            }
+
+            double testStart = inqConstr(startValue);
+
+            //var solver = new BFGS(1E-50, true);
+            //var solbf = solver.Solve(f, startValue, 5000);
+            //var testbf = f(solbf);
+
+            var stmin = f(startValue);
+            var res = quadraticProgramming.Minimize(f, null, inqConstraint,startValue, 1000);
+            //var res = quadraticProgramming.Minimize(f, null, null, startValue, 10000);
+
+            double test = inqConstr(res);
+            double min = f(res);
+        }
+
+        public static void Test21()
+        {
+            SQP quadraticProgramming = new SQP();
+
+            Func<double[], double> f = (x) =>
+            {
+
+                return Math.Pow(x[0] - 1.0, 2) + Math.Pow(x[0] - x[1], 2) +
+                       Math.Pow(x[2] - 1.0, 2) + Math.Pow(x[3] - 1.0, 4) +
+                       Math.Pow(x[4] - 1.0, 6);
+            };
+
+
+            List<Func<double[], double>> eqConstraint = new List<Func<double[], double>>();
+
+            Func<double[], double> eqConstraint1 = (x) =>
+            {
+                return Math.Pow(x[0], 2) * x[3] + Math.Sin(x[3] - x[4]) - 2 * Math.Sqrt(2);
+            };
+
+            Func<double[], double> eqConstraint2 = (x) =>
+            {
+                return x[1] + Math.Pow(x[2], 4) * Math.Pow(x[3], 2) - 8 - Math.Sqrt(2);
+            };
+
+            eqConstraint.Add(eqConstraint1);
+            eqConstraint.Add(eqConstraint2);
+
+            double[] startValue = new double[5];
+            for (int i = 0; i < 5; i++)
+            {
+                startValue[i] = 2.0;
+            }
+            
+
+            var res = quadraticProgramming.Minimize(f, eqConstraint, null, startValue, 10000);
+        }
+
+        public static void Test22()
+        {
+            SQP quadraticProgramming = new SQP();
+
+            Func<double[], double> f = (x) =>
+            {
+
+                return (x[0] * x[0]) + (x[1] * x[1]) + x[0] * x[1] - 14.0 * x[0] - 16 * x[1] +
+                        Math.Pow(x[2] - 10.0, 2) + 4 * Math.Pow(x[3] - 5, 2) + Math.Pow(x[4] - 3.0, 2) +
+                       2 * Math.Pow(x[5] - 1.0, 2) + 5 * x[6] * x[6] + 7 * Math.Pow(x[7] - 11.0, 2) +
+                       2 * Math.Pow(x[8] - 10.0, 2) + Math.Pow(x[9] - 7.0, 2) + 45.0;
+            };
+
+
+            List<Func<double[], double>> inqConstraint = new List<Func<double[], double>>();
+
+            Func<double[], double> inqConstraint1 = (x) =>
+            {
+                return -(105.0 - 4 * x[0] - 5 * x[1] + 3.0 * x[7] - 9.0 * x[7]);
+            };
+
+            Func<double[], double> inqConstraint2 = (x) =>
+            {
+                return -(- 10 * x[0] + 8 * x[1] + 17.0 * x[6] - 2.0 * x[7]);
+            };
+
+            Func<double[], double> inqConstraint3 = (x) =>
+            {
+                return -(8 * x[0] - 2 * x[1] - 5.0 * x[8] + 2.0 * x[9] +12);
+            };
+
+            Func<double[], double> inqConstraint4 = (x) =>
+            {
+                return -(-3.0 * Math.Pow(x[0] - 2.0, 2) - 4.0 * Math.Pow(x[1] - 3.0, 2) - 2.0 * x[2] * x[2] + 7 * x[3] + 120);
+            };
+
+            Func<double[], double> inqConstraint5 = (x) =>
+            {
+                return -(-5.0 * x[0]*x[0] - 8.0 * x[1] -Math.Pow(x[2]-6.0,2) + 2.0 * x[3]+ 40);
+            };
+
+            Func<double[], double> inqConstraint6 = (x) =>
+            {
+                return -(0.5 * Math.Pow(x[0] - 8.0, 2) - 2.0 * Math.Pow(x[1] - 4.0, 2) - 3.0 * x[4] * x[4] + x[5] + 30.0);
+            };
+
+            Func<double[], double> inqConstraint7 = (x) =>
+            {
+                return -(-x[0] * x[0] - 2.0 * Math.Pow(x[1] - 2.0, 2) + 2.0 * x[0] * x[1] - 14.0 * x[4] + 6.0 * x[5]);
+            };
+
+            Func<double[], double> inqConstraint8 = (x) =>
+            {
+                return -(3 * x[0] - 6.0 * x[1] - 12.0 * Math.Pow(x[8] - 8.0, 2) + 7 * x[9]);
+            };
+
+            inqConstraint.Add(inqConstraint1);
+            inqConstraint.Add(inqConstraint2);
+            inqConstraint.Add(inqConstraint3);
+            inqConstraint.Add(inqConstraint4);
+            inqConstraint.Add(inqConstraint5);
+            inqConstraint.Add(inqConstraint6);
+            inqConstraint.Add(inqConstraint7);
+            inqConstraint.Add(inqConstraint8);
+
+            double[] startValue = new double[10] { 2.0, 3.0, 5.0, 5.0, 1.0, 2.0, 7.0, 3.0, 6.0, 10.0 };
+            double fval = f(startValue);
+            
+            var res = quadraticProgramming.Minimize(f, null, inqConstraint, startValue, 10000);
+
+            double fval1 = f(res);
+
+            foreach(var item in inqConstraint)
+            {
+                bool test = false;
+                double vv = item(res);
+                if (vv > 0)
+                    test = true;
+            }
+        }
     }
 }

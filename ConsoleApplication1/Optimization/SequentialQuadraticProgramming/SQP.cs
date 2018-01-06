@@ -1,4 +1,8 @@
 ﻿using ConsoleApplication1.Optimization.LinearSystem;
+using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.LinearAlgebra.Double;
+using MathNet.Numerics.LinearAlgebra.Double.Solvers;
+using MathNet.Numerics.LinearAlgebra.Solvers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +15,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
 
         private const double precisionConst = 1E-16;
         private const double lambda = 0.5;
-        private const double inequalityConstraintTol = 1E-10;
+        private const double inequalityConstraintTol = 1E-8;
         private const double epsilonNw = 0;
         private const double epsilonSe = 0;
 
@@ -30,8 +34,8 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             double precision,
             bool earlyExit)
         {
-            numericalDerivative = new OptimizationNumericalDerivative(5, 2);
-            linearSolver = new MINRES(1E-25, false);
+            numericalDerivative = new OptimizationNumericalDerivative(13, 7);
+            linearSolver = new MINRES(1E-25, true);
             strongWolfeLineSearch = new StrongWolfeLineSearch();
             Precision = precision;
             EarlyExit = earlyExit;
@@ -167,7 +171,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
                 MinVector direction = CalculateDirection(A, b, xNew, lambdaEq, lambdaIq);
 
                 MinVector directionX = ExtractX(direction, xOld);
-
+                
                 MinVector newLambdaIq = lambdaIq + ExtractInequalityLambda(direction, xOld, lambdaEq, lambdaIq);
 
                 if (RemoveNegativeLambda(ref inequalityConstraintsProp, newLambdaIq))
@@ -201,9 +205,17 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
                 }
                 else
                 {
-                    double step = ComputeStepLength(directionX, xOld, inequalityConstraintsProp);
+                    double step = ComputeStepLength(lagrangian, lambdaEq, lambdaIq, directionX, xOld, inequalityConstraintsProp);
+
+                    if (step < 1E-15)
+                        step = 1.0;
 
                     xNew = xOld + step * directionX;
+                    
+                    if (xNew.MinArray.Contains(double.NaN))
+                    {
+                        break;
+                    }
 
                     xNew = ApplyBound(xNew, lowerBound, upperBound);
 
@@ -225,7 +237,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
 
                     if (minValue < lastMinValue &&
                         !inequalityConstraintsProp.Any(x => !x.IsValid) &&
-                        newEqConstraintsViolation <= equalityConstraintViolation)
+                        newEqConstraintsViolation <= inequalityConstraintTol)
                     {
                         lastFeasibleSolution = xNew;
                         equalityConstraintViolation = newEqConstraintsViolation;
@@ -362,6 +374,16 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             return inqManager;
         }
 
+
+
+        Random random = new Random();
+
+
+        public double GetRandomNumber(double minimum, double maximum)
+        {
+            //Random random = new Random();
+            return random.NextDouble() * (maximum - minimum) + minimum;
+        }
         private MinVector CalculateDirection(
             MinVector[] A,
             MinVector b,
@@ -369,10 +391,59 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             MinVector lambdaEq,
             MinVector lambdaIq)
         {
-            MinVector startValue = MinVector.Add(x, lambdaEq);
-            startValue = MinVector.Add(startValue, lambdaIq);
+            MinVector leq = new MinVector(lambdaEq.Count);
+            MinVector liq = new MinVector(lambdaIq.Count);
+            MinVector startValue = MinVector.Add(x, leq);
+            startValue = MinVector.Add(startValue, liq);
+                       
+            MinVector result = linearSolver.Solve(A, b, startValue, 1000);
 
-            return linearSolver.Solve(A, b, startValue, 150);
+            Console.WriteLine("residual start " + linearSolver.GetResidual());
+
+            //if (linearSolver.GetResidual() > 1E-5)
+            //{
+            //    startValue = new MinVector(startValue.Count);
+
+            //    for (int i = 0; i < startValue.Count; i++)
+            //    {
+            //        startValue[i] = random.NextDouble();
+            //    }
+
+            //    result = linearSolver.Solve(A, b, startValue, 1000);
+            //    Console.WriteLine("residual " + linearSolver.GetResidual());
+            //}
+
+            //Console.WriteLine("residual def " + linearSolver.GetResidual());
+
+            //if (result.MinArray.Contains(double.NaN))
+            //{
+            //    startValue = MinVector.Add(startValue, liq);
+            //    result = linearSolver.Solve(A, b, startValue, 150);
+            //}
+            //startValue = new MinVector(startValue.Count);
+
+            //IIterativeSolver<double> solver = new MlkBiCgStab();
+            //((GpBiCg)solver).NumberOfBiCgStabSteps = 10;
+            //((GpBiCg)solver).NumberOfGpBiCgSteps = 2;
+
+            //Matrix<double> matrix = DenseMatrix.OfRowArrays(Array.ConvertAll(A, k => k.MinArray));
+            //Vector<double> input = new DenseVector(b.MinArray);
+            //Vector<double> result = new DenseVector(startValue.MinArray);
+            //IIterationStopCriterion<double>[] stopCriteria = new IIterationStopCriterion<double>[]
+            //{
+            //    new FailureStopCriterion<double>(),
+            //    new DivergenceStopCriterion<double>(),
+            //    new IterationCountStopCriterion<double>(300),
+            //    new ResidualStopCriterion<double>(1e-12)
+            //};
+
+            //Iterator<double> iterator = new Iterator<double>(stopCriteria);
+
+            //solver.Solve(matrix, input, result, iterator, null);
+
+            //return new MinVector(result.ToArray());
+
+            return result;
         }
 
         private double[] SubArray(double[] data, int index, int length)
@@ -548,20 +619,35 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
         }
 
         private double ComputeStepLength(
+            Func<double[], double[], double[], double> f,
+            MinVector lambdaEq,
+            MinVector lambdaIq,
             MinVector direction,
             MinVector x,
             List<InequalityConstraintProperties> inequalityConstraints)
         {
             double stepLength = 1.0;
 
-            foreach (var item in inequalityConstraints.Where(k => !k.IsActive))
+            if (lambdaIq.Count == 0 || Array.Exists(lambdaIq.MinArray, k=> k > 0.0))
+            {
+                MinVector lIq = new MinVector(lambdaIq.Count);
+
+                Func<double[], double> ft = (k) =>
+                {
+                    return f(k, lambdaEq.MinArray, lIq.MinArray);
+                };
+
+                stepLength = strongWolfeLineSearch.GetStepLength(ft, direction, x, 1.5);
+            }
+                        
+            foreach (var item in inequalityConstraints)//Where(k => !k.IsActive))
             {
                 if (item.Function((x + direction).MinArray) < inequalityConstraintTol)
                     continue;
 
                 Func<double[], double> fBase = (k) => { return item.Function(k) * item.Function(k); };
 
-                double step = strongWolfeLineSearch.GetStepLength(fBase, direction, x, 10);
+                double step = strongWolfeLineSearch.GetStepLength(fBase, direction, x, 1.5);
 
                 if (step < stepLength &&
                     step > 1E-50)
