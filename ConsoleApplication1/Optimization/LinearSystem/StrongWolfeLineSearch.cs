@@ -18,53 +18,51 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
 
         #endregion Constructor
         
-
         #region Public Methods
 
         public double GetStepLength(
             Func<double[], double> f,
-            MinVector d,
-            MinVector x0,
-            double alpham)
+            OptVector d,
+            OptVector x0,
+            double alpham,
+            int maxIter)
         {
-            int maxIter = 15;
-
             double alphap = 0;
 
-            double c1 = 1E-4;
-            double c2 = 0.7;
+            double c1 = 1E-7;
+            double c2 = 0.5;
 
-            double alphax = alpham * 0.7;//rnd.NextDouble();
+            double alphax = alpham;//rnd.NextDouble();
 
             double fx0 = f(x0.MinArray);
-            double gx0 = new MinVector(numericalDerivative.EvaluatePartialDerivative(f, x0.MinArray, 1)) * d;
+            double gx0 = new OptVector(numericalDerivative.EvaluatePartialDerivative(f, x0.MinArray, 1)) * d;
 
             double fxp = fx0;
             double gxp = gx0;
 
             for (int i = 1; i < maxIter; i++)
             {
-                MinVector xx = x0 + alphax * d;
+                OptVector xx = x0 + alphax * d;
                 double fxx = f(xx.MinArray);
-                double gxx = new MinVector(numericalDerivative.EvaluatePartialDerivative(f, xx.MinArray, 1)) * d;
+                double gxx = new OptVector(numericalDerivative.EvaluatePartialDerivative(f, xx.MinArray, 1)) * d;
 
                 if (fxx > fx0 + c1 * alphax * gx0 ||
                     (i > 1 && fxx >= fxp))
                 {
-                    return Zoom(f, x0, d, alphap, alphax);
+                    return Zoom(f, x0, d, alphap, alphax,maxIter);
                 }
 
                 if (Math.Abs(gxx) <= -c2 * gx0)
                     return alphax;
 
                 if (gxx >= 0)
-                    return Zoom(f, x0, d, alphax, alphap);
+                    return Zoom(f, x0, d, alphax, alphap,maxIter);
 
                 alphap = alphax;
                 fxp = fxx;
                 gxp = gxx;
 
-                double r = 0.7;//rnd.NextDouble();
+                double r = rnd.NextDouble();
 
                 alphax = alphax + (alpham - alphax) * r;
             }
@@ -75,12 +73,11 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
         public double GetStepLength(
             Func<double[], double> f,
             Func<double[], double>[] df,
-            MinVector d,
-            MinVector x0,
+            OptVector d,
+            OptVector x0,
             double alpham)
         {
-            int maxIter = 10;
-
+            int maxIter = 15;
             double alphap = 0;
 
             double c1 = 1E-4;
@@ -98,7 +95,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
 
             for (int i = 1; i < maxIter; i++)
             {
-                MinVector xx = x0 + alphax * d;
+                OptVector xx = x0 + alphax * d;
                 double fxx = f(xx.MinArray);
                 double gxx = OptimizationHelper.Derivative(df, xx) * d;
 
@@ -118,7 +115,7 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
                 fxp = fxx;
                 gxp = gxx;
 
-                alphax = alphax + (alpham - alphax) * rnd.NextDouble();
+                alphax = alphax + (alpham - alphax) * 0.3;
             }
 
             return alphax;
@@ -132,27 +129,27 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
 
         private double Zoom(
             Func<double[], double> f,
-            MinVector x0,
-            MinVector d,
+            OptVector x0,
+            OptVector d,
             double alphal,
-            double alphah)
+            double alphah,
+            int maxIter)
         {
-            int maxIter = 50;
-            double c1 = 1E-4;
-            double c2 = 0.7;
+            double c1 = 1E-7;
+            double c2 = 0.5;
 
             double fx0 = f(x0.MinArray);
-            double gx0 = new MinVector(numericalDerivative.EvaluatePartialDerivative(f, x0.MinArray, 1)) * d;
+            double gx0 = new OptVector(numericalDerivative.EvaluatePartialDerivative(f, x0.MinArray, 1)) * d;
 
             double alphax = 0.0;
 
             for (int i = 0; i < maxIter; i++)
             {
                 alphax = 0.5 * (alphal + alphah);
-                MinVector xx = x0 + alphax * d;
+                OptVector xx = x0 + alphax * d;
                 double fxx = f(xx.MinArray);
-                double gxx = new MinVector(numericalDerivative.EvaluatePartialDerivative(f, xx.MinArray,1)) * d;
-                MinVector xl = x0 + alphal * d;
+                
+                OptVector xl = x0 + alphal * d;
                 double fxl = f(xl.MinArray);
 
                 if (fxx > fx0 + c1 * alphax * gx0 ||
@@ -160,12 +157,13 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
                     alphah = alphax;
                 else
                 {
+                    double gxx = new OptVector(numericalDerivative.EvaluatePartialDerivative(f, xx.MinArray, 1)) * d;
                     if (Math.Abs(gxx) <= -c2 * gx0)
-                    {
                         return alphax;
-                    }
+                    
                     if (gxx * (alphah - alphal) >= 0.0)
                         alphah = alphal;
+
                     alphal = alphax;
                 }
             }
@@ -175,8 +173,8 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
         private static double Zoom(
            Func<double[], double> f,
            Func<double[], double>[] df,
-           MinVector x0,
-           MinVector d,
+           OptVector x0,
+           OptVector d,
            double alphal,
            double alphah)
         {
@@ -192,10 +190,10 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             for (int i = 0; i < maxIter; i++)
             {
                 alphax = 0.5 * (alphal + alphah);
-                MinVector xx = x0 + alphax * d;
+                OptVector xx = x0 + alphax * d;
                 double fxx = f(xx.MinArray);
                 double gxx = OptimizationHelper.Derivative(df, xx) * d;
-                MinVector xl = x0 + alphal * d;
+                OptVector xl = x0 + alphal * d;
                 double fxl = f(xl.MinArray);
 
                 if (fxx > fx0 + c1 * alphax * gx0 ||

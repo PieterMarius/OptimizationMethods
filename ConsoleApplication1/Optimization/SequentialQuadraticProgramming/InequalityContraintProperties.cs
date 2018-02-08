@@ -8,6 +8,9 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
         public double Lambda { get; set; }
         public Func<double[], double> Function { get; set; }
         public bool IsValid { get; set; }
+        public double PenaltyParam { get; set; }
+        public bool Linear { get; set; }
+        public int BoundIndex { get; set; }
 
         public InequalityConstraintProperties()
         { }
@@ -16,12 +19,18 @@ namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
             bool isActive,
             double lambda,
             Func<double[], double> function,
-            bool isValid)
+            bool isValid,
+            double penaltyParam,
+            bool linear,
+            int boundIndex)
         {
             IsActive = isActive;
             Lambda = lambda;
             Function = function;
             IsValid = isValid;
+            PenaltyParam = penaltyParam;
+            Linear = linear;
+            BoundIndex = boundIndex;
         }
     }
 }

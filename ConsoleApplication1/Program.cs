@@ -79,36 +79,42 @@ namespace ConsoleApplication1
                        10 * Math.Pow(x[0] - x[3], 4);
             };
 
-            MinVector[] ttt = new MinVector[3];
-            ttt[0] = new MinVector(new double[3] { 1, 2 ,3 });
-            ttt[1] = new MinVector(new double[3] { 4, 5, 6 });
-            ttt[2] = new MinVector(new double[3] { 7, 8, 9 });
+            OptVector[] ttt = new OptVector[3];
+            ttt[0] = new OptVector(new double[3] { 1, 2 ,3 });
+            ttt[1] = new OptVector(new double[3] { 4, 5, 6 });
+            ttt[2] = new OptVector(new double[3] { 7, 8, 9 });
 
-            var tr = MinVector.Transpose(ttt);
+            var tr = OptVector.Transpose(ttt);
 
             //TestsSQP.Test0();
-            //TestsSQP.Test1();
-            //TestsSQP.Test2();
-            //TestsSQP.Test3();
+            TestsSQP.Test1();
+            TestsSQP.Test2();
+            TestsSQP.Test3();
             ////TestsSQP.Test4();
             ////TestsSQP.Test5();
-            //TestsSQP.Test6();
-            //TestsSQP.Test7();
-            //TestsSQP.Test8();
-            //TestsSQP.Test9();
-            //TestsSQP.Test10();
-            //TestsSQP.Test11();
-            //TestsSQP.Test12();
-            //TestsSQP.Test13();
-            //TestsSQP.Test14();
-            //TestsSQP.Test15();
-            //TestsSQP.Test16();
-            //TestsSQP.Test17();
-            //TestsSQP.Test18();
-            //TestsSQP.Test19();
-            //TestsSQP.Test20();
-            //TestsSQP.Test21();
+            TestsSQP.Test6();
+            TestsSQP.Test7();
+            TestsSQP.Test8();
+            TestsSQP.Test9();
+            TestsSQP.Test10();
+            TestsSQP.Test11();
+            TestsSQP.Test12();
+            TestsSQP.Test13();
+            TestsSQP.Test14();
+            TestsSQP.Test15();
+            TestsSQP.Test16();
+            TestsSQP.Test17();
+            TestsSQP.Test18();
+            TestsSQP.Test19();
+            TestsSQP.Test20();
+            TestsSQP.Test21();
             TestsSQP.Test22();
+            TestsSQP.Test23();
+            TestsSQP.Test24();
+            TestsSQP.Test25();
+            TestsSQP.Test26();
+            TestsSQP.Test27();
+            TestsSQP.Test28();
             //TestCGMethod();
 
             BFGS bfsg = new BFGS();
@@ -143,25 +149,25 @@ namespace ConsoleApplication1
         
         static void TestFunc()
         {
-            MinVector a = new MinVector(new double[] { 1, 2 });
-            MinVector b = new MinVector(new double[] { 3, 4 });
+            OptVector a = new OptVector(new double[] { 1, 2 });
+            OptVector b = new OptVector(new double[] { 3, 4 });
 
-            MinVector c = new MinVector(new double[] { 1, 3 });
-            MinVector d = new MinVector(new double[] { 4, 7 });
+            OptVector c = new OptVector(new double[] { 1, 3 });
+            OptVector d = new OptVector(new double[] { 4, 7 });
 
-            var res = MinVector.Mult(a, b);
+            var res = OptVector.Mult(a, b);
 
-            var res1 = MinVector.SubtractFromIdentity(res);
+            var res1 = OptVector.SubtractFromIdentity(res);
 
-            var res2 = MinVector.Div(res, 2);
+            var res2 = OptVector.Div(res, 2);
 
-            MinVector[] aa = new MinVector[] { a, b };
-            MinVector[] bb = new MinVector[] { c, d };
+            OptVector[] aa = new OptVector[] { a, b };
+            OptVector[] bb = new OptVector[] { c, d };
 
-            var res3 = MinVector.Mult(res, bb);
-            var res4 = MinVector.Sum(res, bb);
+            var res3 = OptVector.Mult(res, bb);
+            var res4 = OptVector.Sum(res, bb);
 
-            var res5 = MinVector.Mult(res, c);
+            var res5 = OptVector.Mult(res, c);
 
             
         }
@@ -173,38 +179,38 @@ namespace ConsoleApplication1
             MINRES minres = new MINRES();
             CGMethod cg = new CGMethod();
 
-            MinVector[] A2 = new MinVector[3];
-            A2[0] = new MinVector(new double[] { 2, 1, 3 });
-            A2[1] = new MinVector(new double[] { 2, 6, 8 });
-            A2[2] = new MinVector(new double[] { 6, 8, 18 });
+            OptVector[] A2 = new OptVector[3];
+            A2[0] = new OptVector(new double[] { 2, 1, 3 });
+            A2[1] = new OptVector(new double[] { 2, 6, 8 });
+            A2[2] = new OptVector(new double[] { 6, 8, 18 });
 
-            MinVector b2 = new MinVector(new double[] { 1, 3, 5 });
+            OptVector b2 = new OptVector(new double[] { 1, 3, 5 });
 
-            var minresSol = minres.Solve(A2, b2, new MinVector(new double[3]), 50);
-            var sol2 = cg.Solve(A2, b2, new MinVector(new double[3]), 50);
+            var minresSol = minres.Solve(A2, b2, new OptVector(new double[3]), 50);
+            var sol2 = cg.Solve(A2, b2, new OptVector(new double[3]), 50);
 
-            MinVector[] A = new MinVector[3];
-            A[0] = new MinVector(new double[] { 2, 0, 1 });
-            A[1] = new MinVector(new double[] { 1, 6, 0 });
-            A[2] = new MinVector(new double[] { 3, 2, 3 });
+            OptVector[] A = new OptVector[3];
+            A[0] = new OptVector(new double[] { 2, 0, 1 });
+            A[1] = new OptVector(new double[] { 1, 6, 0 });
+            A[2] = new OptVector(new double[] { 3, 2, 3 });
 
-            MinVector x = new MinVector(new double[] { 2, 5, 7 });
+            OptVector x = new OptVector(new double[] { 2, 5, 7 });
             
-            var sol = cg.Solve(A, x, new MinVector(new double[3]), 50);
-            var solm = minres.Solve(A, x, new MinVector(new double[3]), 50);
+            var sol = cg.Solve(A, x, new OptVector(new double[3]), 50);
+            var solm = minres.Solve(A, x, new OptVector(new double[3]), 50);
 
-            MinVector[] A1 = new MinVector[3];
-            A1[0] = new MinVector(new double[] { 3, 1, -6 });
-            A1[1] = new MinVector(new double[] { 2, 1, -5 });
-            A1[2] = new MinVector(new double[] { 6, -3, 3 });
+            OptVector[] A1 = new OptVector[3];
+            A1[0] = new OptVector(new double[] { 3, 1, -6 });
+            A1[1] = new OptVector(new double[] { 2, 1, -5 });
+            A1[2] = new OptVector(new double[] { 6, -3, 3 });
 
-            MinVector b1 = new MinVector(new double[] { -10, -8, 0 });
+            OptVector b1 = new OptVector(new double[] { -10, -8, 0 });
 
-            var sol1 = cg.Solve(A1, b1, new MinVector(new double[3]), 200);
-            var solm1 = minres.Solve(A1, b1, new MinVector(new double[3]), 200);
+            var sol1 = cg.Solve(A1, b1, new OptVector(new double[3]), 200);
+            var solm1 = minres.Solve(A1, b1, new OptVector(new double[3]), 200);
 
-            MinVector diff = b1 - MinVector.Mult(A1, solm1);
-            MinVector diff1 = b1 - MinVector.Mult(A1, sol1);
+            OptVector diff = b1 - OptVector.Mult(A1, solm1);
+            OptVector diff1 = b1 - OptVector.Mult(A1, sol1);
         }
 
         static double RationalApproximation(double t)

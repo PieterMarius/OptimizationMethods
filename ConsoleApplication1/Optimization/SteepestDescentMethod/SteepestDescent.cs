@@ -8,26 +8,35 @@ namespace ConsoleApplication1.Optimization.SteepestDescentMethod
         #region Fields
                 
         private const double precisionConst = 1E-12;
+        private const int maxIterLS = 100;
+        private const int maxIterLSZoom = 100;
+
         private OptimizationNumericalDerivative numericalDerivative;
         private readonly StrongWolfeLineSearch strongWolfeLineSearch;
         private double StepSize;
 
         public double Precision { get; private set; }
+        public int MaxIterLineSearch { get; private set; }
+        public int MaxIterLineSearchZoom { get; private set; }
 
         #endregion
 
         #region Constructor
 
         public SteepestDescent(
-            double precision)
+            double precision,
+            int maxIterLineSearch,
+            int maxIterLineSearchZoom)
         {
             numericalDerivative = new OptimizationNumericalDerivative(5,2);
             strongWolfeLineSearch = new StrongWolfeLineSearch();
+            MaxIterLineSearch = maxIterLineSearch;
+            MaxIterLineSearchZoom = maxIterLineSearchZoom;
             Precision = precision;
         }
 
         public SteepestDescent()
-            : this(precisionConst)
+            : this(precisionConst, maxIterLS, maxIterLSZoom)
         { }
 
         #endregion
@@ -40,13 +49,13 @@ namespace ConsoleApplication1.Optimization.SteepestDescentMethod
             double[] startValue,
             int nIter)
         {
-            MinVector xOld = new MinVector(startValue);
+            OptVector xOld = new OptVector(startValue);
 
-            MinVector xNew = new MinVector();
+            OptVector xNew = new OptVector();
 
             for (int i = 0; i < nIter; i++)
             {
-                MinVector direction = -1.0 * OptimizationHelper.Derivative(df, xOld);
+                OptVector direction = -1.0 * OptimizationHelper.Derivative(df, xOld);
 
                 StepSize = strongWolfeLineSearch.GetStepLength(f, df, direction, xOld, 20);
 
@@ -65,15 +74,15 @@ namespace ConsoleApplication1.Optimization.SteepestDescentMethod
             double[] startValue,
             int nIter)
         {
-            MinVector xOld = new MinVector(startValue);
+            OptVector xOld = new OptVector(startValue);
 
-            MinVector xNew = new MinVector();
+            OptVector xNew = new OptVector();
                        
             for (int i = 0; i < nIter; i++)
             {
-                MinVector direction = -1.0 * new MinVector(numericalDerivative.EvaluatePartialDerivative(f, xOld.MinArray, 1));
-                
-                StepSize = strongWolfeLineSearch.GetStepLength(f, direction, xOld, 20);
+                OptVector direction = -1.0 * new OptVector(numericalDerivative.EvaluatePartialDerivative(f, xOld.MinArray, 1));
+
+                StepSize = strongWolfeLineSearch.GetStepLength(f, direction, xOld, 20, MaxIterLineSearch);
 
                 xNew  = xOld + StepSize * direction;
                 
@@ -90,10 +99,10 @@ namespace ConsoleApplication1.Optimization.SteepestDescentMethod
         #region Private Methods
 
         private bool CheckEarlyExit(
-            MinVector xNew,
-            MinVector xOld)
+            OptVector xNew,
+            OptVector xOld)
         {
-            MinVector diff = xNew - xOld;
+            OptVector diff = xNew - xOld;
 
             double result = 0.0;
 

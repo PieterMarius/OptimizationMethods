@@ -76,7 +76,7 @@
     <Compile Include="Optimization\NonLinearConjugateGradient\NLCG.cs" />
     <Compile Include="Optimization\SequentialQuadraticProgramming\SQP.cs" />
     <Compile Include="Optimization\SteepestDescentMethod\SteepestDescent.cs" />
-    <Compile Include="Optimization\MinVector.cs" />
+    <Compile Include="Optimization\OptVector.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestSQP.cs" />

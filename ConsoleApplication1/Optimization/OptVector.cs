@@ -4,34 +4,34 @@ using System.Linq;
 
 namespace ConsoleApplication1.Optimization
 {
-    public struct MinVector
+    public struct OptVector
     {
         private double[] minArray { get; set; }
 
-        public MinVector(double[] variables)
+        public OptVector(double[] variables)
         {
             minArray = new double[variables.Length];
             Array.Copy(variables, minArray, variables.Length);
         }
 
-        public MinVector(MinVector v)
+        public OptVector(OptVector v)
         {
             minArray = new double[v.minArray.Length];
             Array.Copy(v.minArray, minArray, v.minArray.Length);
         }
 
-        public MinVector(double var)
+        public OptVector(double var)
         {
             minArray = new double[1];
             minArray[0] = var;
         }
 
-        public MinVector(int dim)
+        public OptVector(int dim)
         {
             minArray = new double[dim];
         }
 
-        public MinVector(int dim, double value)
+        public OptVector(int dim, double value)
         {
             minArray = new double[dim];
 
@@ -63,7 +63,7 @@ namespace ConsoleApplication1.Optimization
             get { return minArray; }
         }
 
-        public static MinVector Populate(MinVector arr, double value)
+        public static OptVector Populate(OptVector arr, double value)
         {
             for (int i = 0; i < arr.Count; i++)
             {
@@ -73,7 +73,7 @@ namespace ConsoleApplication1.Optimization
             return arr;
         }
 
-        public void Add(MinVector v)
+        public void Add(OptVector v)
         {
             var buf = minArray.ToList();
 
@@ -100,16 +100,16 @@ namespace ConsoleApplication1.Optimization
             minArray = buf.ToArray();
         }
 
-        public static MinVector Add(MinVector v, MinVector d)
+        public static OptVector Add(OptVector v, OptVector d)
         {
             var buf = v.minArray.ToList();
 
             buf.AddRange(d.minArray.ToList());
 
-            return new MinVector(buf.ToArray());
+            return new OptVector(buf.ToArray());
         }
 
-        public static MinVector operator +(MinVector a, MinVector b)
+        public static OptVector operator +(OptVector a, OptVector b)
         {
             double[] result = new double[a.minArray.Length];
             for (int i = 0; i < a.minArray.Length; i++)
@@ -117,10 +117,10 @@ namespace ConsoleApplication1.Optimization
                 result[i] = a.minArray[i] + b.minArray[i];
             }
 
-            return new MinVector(result);
+            return new OptVector(result);
         }
 
-        public static MinVector operator +(MinVector a, double b)
+        public static OptVector operator +(OptVector a, double b)
         {
             double[] result = new double[a.minArray.Length];
             for (int i = 0; i < a.minArray.Length; i++)
@@ -128,10 +128,10 @@ namespace ConsoleApplication1.Optimization
                 result[i] = a.minArray[i] + b;
             }
 
-            return new MinVector(result);
+            return new OptVector(result);
         }
 
-        public static MinVector operator -(MinVector a, MinVector b)
+        public static OptVector operator -(OptVector a, OptVector b)
         {
             double[] result = new double[a.minArray.Length];
             for (int i = 0; i < a.minArray.Length; i++)
@@ -139,10 +139,10 @@ namespace ConsoleApplication1.Optimization
                 result[i] = a.minArray[i] - b.minArray[i];
             }
 
-            return new MinVector(result);
+            return new OptVector(result);
         }
 
-        public static MinVector operator -(MinVector a, double b)
+        public static OptVector operator -(OptVector a, double b)
         {
             double[] result = new double[a.minArray.Length];
             for (int i = 0; i < a.minArray.Length; i++)
@@ -150,10 +150,10 @@ namespace ConsoleApplication1.Optimization
                 result[i] = a.minArray[i] - b;
             }
 
-            return new MinVector(result);
+            return new OptVector(result);
         }
 
-        public static MinVector operator *(MinVector a, double b)
+        public static OptVector operator *(OptVector a, double b)
         {
             double[] result = new double[a.minArray.Length];
             for (int i = 0; i < a.minArray.Length; i++)
@@ -161,10 +161,10 @@ namespace ConsoleApplication1.Optimization
                 result[i] = a.minArray[i] * b;
             }
 
-            return new MinVector(result);
+            return new OptVector(result);
         }
 
-        public static MinVector operator *(double b, MinVector a)
+        public static OptVector operator *(double b, OptVector a)
         {
             double[] result = new double[a.minArray.Length];
             for (int i = 0; i < a.minArray.Length; i++)
@@ -172,11 +172,11 @@ namespace ConsoleApplication1.Optimization
                 result[i] = a.minArray[i] * b;
             }
 
-            return new MinVector(result);
+            return new OptVector(result);
         }
 
 
-        public static double operator *(MinVector a, MinVector b)
+        public static double operator *(OptVector a, OptVector b)
         {
             double result = 0.0;
             for (int i = 0; i < a.minArray.Length; i++)
@@ -187,27 +187,27 @@ namespace ConsoleApplication1.Optimization
             return result;
         }
 
-        public static MinVector operator /(MinVector a, double b)
+        public static OptVector operator /(OptVector a, double b)
         {
             double[] result = new double[a.minArray.Length];
             for (int i = 0; i < a.minArray.Length; i++)
                 result[i] = a.minArray[i] / b;
 
-            return new MinVector(result);
+            return new OptVector(result);
         }
 
-        public static MinVector operator /(double a, MinVector b)
+        public static OptVector operator /(double a, OptVector b)
         {
             double[] result = new double[b.minArray.Length];
             for (int i = 0; i < b.minArray.Length; i++)
                 result[i] = a / b.minArray[i];
 
-            return new MinVector(result);
+            return new OptVector(result);
         }
 
-        public static MinVector[] Div(MinVector[] a, double b)
+        public static OptVector[] Div(OptVector[] a, double b)
         {
-            MinVector[] result = new MinVector[a.Length];
+            OptVector[] result = new OptVector[a.Length];
 
             for (int i = 0; i < a.Length; i++)
                 result[i] = a[i] / b;
@@ -215,9 +215,9 @@ namespace ConsoleApplication1.Optimization
             return result;
         }
 
-        public static MinVector[] Mult(MinVector a, MinVector b)
+        public static OptVector[] Mult(OptVector a, OptVector b)
         {
-            MinVector[] result = new MinVector[a.minArray.Length];
+            OptVector[] result = new OptVector[a.minArray.Length];
 
             for (int i = 0; i < a.minArray.Length; i++)
             {
@@ -226,15 +226,15 @@ namespace ConsoleApplication1.Optimization
                 for (int j = 0; j < a.minArray.Length; j++)
                     v[j] = a.minArray[i] * b.minArray[j];
 
-                result[i] = new MinVector(v);
+                result[i] = new OptVector(v);
             }
 
             return result;
         }
 
-        public static MinVector[] Mult(MinVector[] a, MinVector[] b)
+        public static OptVector[] Mult(OptVector[] a, OptVector[] b)
         {
-            MinVector[] result = new MinVector[a.Length];
+            OptVector[] result = new OptVector[a.Length];
 
             for (int i = 0; i < a.Length; i++)
             {
@@ -243,23 +243,23 @@ namespace ConsoleApplication1.Optimization
                 for (int j = 0; j < a.Length; j++)
                     v[j] = a[i] * GetColumn(b, j);
 
-                result[i] = new MinVector(v);
+                result[i] = new OptVector(v);
             }
 
             return result;
         }
 
-        public static MinVector Mult(MinVector[] a, MinVector b)
+        public static OptVector Mult(OptVector[] a, OptVector b)
         {
             double[] result = new double[a.Length];
 
             for (int i = 0; i < a.Length; i++)
                 result[i] = a[i] * b;
 
-            return new MinVector(result);
+            return new OptVector(result);
         }
 
-        public static MinVector Mult(MinVector a, MinVector[] b)
+        public static OptVector Mult(OptVector a, OptVector[] b)
         {
             double[] result = new double[b.Length];
 
@@ -273,12 +273,12 @@ namespace ConsoleApplication1.Optimization
                 result[i] = sum;
             }
 
-            return new MinVector(result);
+            return new OptVector(result);
         }
 
-        public static MinVector[] SubtractFromIdentity(MinVector[] v)
+        public static OptVector[] SubtractFromIdentity(OptVector[] v)
         {
-            MinVector[] result = new MinVector[v.Length];
+            OptVector[] result = new OptVector[v.Length];
 
             for (int i = 0; i < v.Length; i++)
             {
@@ -289,18 +289,18 @@ namespace ConsoleApplication1.Optimization
                     b[j] = (i == j) ? 1 - v[i].minArray[j] : -v[i].minArray[j];
                 }
 
-                result[i] = new MinVector(b);
+                result[i] = new OptVector(b);
             }
 
             return result;
         }
 
-        public static MinVector[] InvertDiag(MinVector[] a)
+        public static OptVector[] InvertDiag(OptVector[] a)
         {
-            MinVector[] result = new MinVector[a.Length];
+            OptVector[] result = new OptVector[a.Length];
             for (int i = 0; i < a.Length; i++)
             {
-                result[i] = new MinVector(a.Length);
+                result[i] = new OptVector(a.Length);
                 if (a[i][i] != 0.0)
                     result[i][i] = 1.0 / a[i][i];
                 else
@@ -310,13 +310,13 @@ namespace ConsoleApplication1.Optimization
             return result;
         }
 
-        public static MinVector[] IncompleteCholesky(MinVector[] a)
+        public static OptVector[] IncompleteCholesky(OptVector[] a)
         {
-            MinVector[] result = new MinVector[a.Length];
+            OptVector[] result = new OptVector[a.Length];
 
             for (int i = 0; i < a.Length; i++)
             {
-                result[i] = new MinVector(a.Length);
+                result[i] = new OptVector(a.Length);
             }
 
             for (int i = 0; i < a.Length; i++)
@@ -344,7 +344,7 @@ namespace ConsoleApplication1.Optimization
             return result;
         }
 
-        public static MinVector Abs(MinVector a)
+        public static OptVector Abs(OptVector a)
         {
             double[] result = new double[a.minArray.Length];
             for (int i = 0; i < a.minArray.Length; i++)
@@ -352,26 +352,26 @@ namespace ConsoleApplication1.Optimization
                 result[i] = Math.Abs(a.minArray[i]);
             }
 
-            return new MinVector(result);
+            return new OptVector(result);
         }
 
-        public static MinVector Min(MinVector a, double v, int i)
+        public static OptVector Min(OptVector a, double v, int i)
         {
             a.minArray[i] = a.minArray[i] - v;
 
-            return new MinVector(a.minArray);
+            return new OptVector(a.minArray);
         }
 
-        public static MinVector Sum(MinVector a, double v, int i)
+        public static OptVector Sum(OptVector a, double v, int i)
         {
             a.minArray[i] = a.minArray[i] + v;
 
-            return new MinVector(a.minArray);
+            return new OptVector(a.minArray);
         }
 
-        public static MinVector[] Sum(MinVector[] a, MinVector[] b)
+        public static OptVector[] Sum(OptVector[] a, OptVector[] b)
         {
-            MinVector[] result = new MinVector[a.Length];
+            OptVector[] result = new OptVector[a.Length];
             for (int i = 0; i < a.Length; i++)
             {
                 result[i] = a[i] + b[i];
@@ -380,9 +380,9 @@ namespace ConsoleApplication1.Optimization
             return result;
         }
 
-        public static MinVector[] Sum(MinVector[] a, double b)
+        public static OptVector[] Sum(OptVector[] a, double b)
         {
-            MinVector[] result = new MinVector[a.Length];
+            OptVector[] result = new OptVector[a.Length];
             for (int i = 0; i < a.Length; i++)
             {
                 result[i] = a[i] + b;
@@ -391,35 +391,35 @@ namespace ConsoleApplication1.Optimization
             return result;
         }
 
-        public static MinVector GetColumn(MinVector[] a, int index)
+        public static OptVector GetColumn(OptVector[] a, int index)
         {
             double[] result = new double[a.Length];
 
             for (int i = 0; i < a.Length; i++)
                 result[i] = a[i].minArray[index];
 
-            return new MinVector(result);
+            return new OptVector(result);
         }
 
-        public static MinVector GetIndex(MinVector a, int index)
+        public static OptVector GetIndex(OptVector a, int index)
         {
             double[] vt = new double[a.minArray.Length];
 
             vt[index] = a.minArray[index];
 
-            return new MinVector(vt);
+            return new OptVector(vt);
         }
 
-        public static MinVector[] Transpose(MinVector[] src)
+        public static OptVector[] Transpose(OptVector[] src)
         {
-            MinVector[] result = new MinVector[src.Length];
+            OptVector[] result = new OptVector[src.Length];
 
             for (int i = 0; i < result.Length; i++)
-                result[i] = new MinVector(result.Length);
+                result[i] = new OptVector(result.Length);
 
             for (int i = 0; i < src.Length; i++)
             {
-                MinVector buf = new MinVector(src.Length);
+                OptVector buf = new OptVector(src.Length);
 
                 for (int j = 0; j < src.Length; j++)
                     buf.minArray[j] = src[j].minArray[i];
@@ -431,7 +431,7 @@ namespace ConsoleApplication1.Optimization
             return result;
         }
 
-        public static bool CheckPositiveDefiniteMatrix(MinVector[] m)
+        public static bool CheckPositiveDefiniteMatrix(OptVector[] m)
         {
             for (int i = 0; i < m.Length; i++)
             {
@@ -452,7 +452,7 @@ namespace ConsoleApplication1.Optimization
 
         }
 
-        public static bool Equals(MinVector a, MinVector b)
+        public static bool Equals(OptVector a, OptVector b)
         {
             if (a.Count != b.Count)
                 return false;
@@ -466,7 +466,7 @@ namespace ConsoleApplication1.Optimization
             return true;
         }
 
-        public static bool Equals(MinVector[] a, MinVector[] b)
+        public static bool Equals(OptVector[] a, OptVector[] b)
         {
             if (a.Length != b.Length)
                 return false;
@@ -480,15 +480,29 @@ namespace ConsoleApplication1.Optimization
             return true;
         }
 
-        public static MinVector[] GetIdentity(int dim)
+        public static OptVector[] GetIdentity(int dim)
         {
-            MinVector[] result = new MinVector[dim];
+            OptVector[] result = new OptVector[dim];
 
             for (int i = 0; i < dim; i++)
             {
                 double[] v = new double[dim];
                 v[i] = 1;
-                result[i] = new MinVector(v);
+                result[i] = new OptVector(v);
+            }
+
+            return result;
+        }
+
+        public static OptVector[] GetIdentity(int dim, OptVector values)
+        {
+            OptVector[] result = new OptVector[dim];
+
+            for (int i = 0; i < dim; i++)
+            {
+                double[] v = new double[dim];
+                v[i] = values[i];
+                result[i] = new OptVector(v);
             }
 
             return result;
@@ -497,6 +511,11 @@ namespace ConsoleApplication1.Optimization
         public double Length()
         {
             return Math.Sqrt(this * this);
+        }
+
+        public OptVector Normalize()
+        {
+            return this / this.Length();
         }
     }
 }

@@ -8,27 +8,35 @@ namespace ConsoleApplication1.Optimization.NonLinearConjugateGradient
         #region Fields
 
         private const double precisionConst = 1E-15;
+        private const int maxIterLS = 100;
+        private const int maxIterLSZoom = 100;
 
         private OptimizationNumericalDerivative numericalDerivative;
         private readonly StrongWolfeLineSearch strongWolfeLineSearch;
 
         private double StepSize;
         public double Precision { get; private set; }
+        public int MaxIterLineSearch { get; private set; }
+        public int MaxIterLineSearchZoom { get; private set; }
 
         #endregion
 
         #region Constructor
 
         public NLCG(
-            double precision)
+            double precision,
+            int maxIterLineSearch,
+            int maxIterLineSearchZoom)
         {
             numericalDerivative = new OptimizationNumericalDerivative(5, 2);
             strongWolfeLineSearch = new StrongWolfeLineSearch();
+            MaxIterLineSearch = maxIterLineSearch;
+            MaxIterLineSearchZoom = maxIterLineSearchZoom;
             Precision = precision;
         }
 
         public NLCG()
-            :this(precisionConst)
+            : this(precisionConst, maxIterLS, maxIterLSZoom)
         { }
 
         #endregion
@@ -40,24 +48,24 @@ namespace ConsoleApplication1.Optimization.NonLinearConjugateGradient
             double[] startValue,
             int nIter)
         {
-            MinVector xOld = new MinVector(startValue);
-            MinVector xNew = new MinVector();
-            MinVector derivativeOld = new MinVector(numericalDerivative.EvaluatePartialDerivative(f, xOld.MinArray, 1));
+            OptVector xOld = new OptVector(startValue);
+            OptVector xNew = new OptVector();
+            OptVector derivativeOld = new OptVector(numericalDerivative.EvaluatePartialDerivative(f, xOld.MinArray, 1));
 
-            MinVector direction = -1.0 * derivativeOld;
+            OptVector direction = -1.0 * derivativeOld;
 
-            MinVector derivativeNew = new MinVector();
+            OptVector derivativeNew = new OptVector();
             
             for (int i = 0; i < nIter; i++)
             {
-                StepSize = strongWolfeLineSearch.GetStepLength(f, direction, xOld, 20);
+                StepSize = strongWolfeLineSearch.GetStepLength(f, direction, xOld, 20, MaxIterLineSearch);
 
                 xNew = xOld + StepSize * direction;
 
                 if (CheckEarlyExit(xNew, xOld))
                     break;
 
-                derivativeNew = new MinVector(numericalDerivative.EvaluatePartialDerivative(f, xNew.MinArray, 1));
+                derivativeNew = new OptVector(numericalDerivative.EvaluatePartialDerivative(f, xNew.MinArray, 1));
 
                 double beta = PolakRibiere(derivativeNew, derivativeOld);
 
@@ -75,12 +83,12 @@ namespace ConsoleApplication1.Optimization.NonLinearConjugateGradient
             double[] startValue,
             int nIter)
         {
-            MinVector xOld = new MinVector(startValue);
-            MinVector xNew = new MinVector();
-            MinVector derivativeOld = OptimizationHelper.Derivative(df, xOld);
-            MinVector direction = -1.0 * derivativeOld;
+            OptVector xOld = new OptVector(startValue);
+            OptVector xNew = new OptVector();
+            OptVector derivativeOld = OptimizationHelper.Derivative(df, xOld);
+            OptVector direction = -1.0 * derivativeOld;
 
-            MinVector derivativeNew = new MinVector();
+            OptVector derivativeNew = new OptVector();
             
             for (int i = 0; i < nIter; i++)
             {
@@ -109,8 +117,8 @@ namespace ConsoleApplication1.Optimization.NonLinearConjugateGradient
         #region Private Methods
 
         public double PolakRibiere(
-            MinVector derivativeNew,
-            MinVector derivativeOld)
+            OptVector derivativeNew,
+            OptVector derivativeOld)
         {
             double num = derivativeNew * (derivativeNew - derivativeOld);
             double den = derivativeOld * derivativeOld;
@@ -122,10 +130,10 @@ namespace ConsoleApplication1.Optimization.NonLinearConjugateGradient
         }
 
         private bool CheckEarlyExit(
-            MinVector xNew,
-            MinVector xOld)
+            OptVector xNew,
+            OptVector xOld)
         {
-            MinVector diff = xNew - xOld;
+            OptVector diff = xNew - xOld;
 
             double result = 0.0;
 

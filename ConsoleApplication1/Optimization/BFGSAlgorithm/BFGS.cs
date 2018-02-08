@@ -8,7 +8,9 @@ namespace ConsoleApplication1.Optimization
     {
         #region Fields
 
-        private const double precisionConst = 1E-15;
+        private const double precisionConst = 1E-20;
+        private const int maxIterLS = 100;
+        private const int maxIterLSZoom = 100;
 
         private OptimizationNumericalDerivative numericalDerivative;
         private readonly StrongWolfeLineSearch strongWolfeLineSearch;
@@ -17,6 +19,8 @@ namespace ConsoleApplication1.Optimization
 
         public double Precision { get; private set; }
         public bool EarlyExit { get; private set; }
+        public int MaxIterLineSearch { get; private set; }
+        public int MaxIterLineSearchZoom { get; private set; }
 
         #endregion
 
@@ -24,16 +28,20 @@ namespace ConsoleApplication1.Optimization
 
         public BFGS(
             double precision,
+            int maxIterLineSearch,
+            int maxIterLineSearchZoom,
             bool earlyExit)
         {
             numericalDerivative = new OptimizationNumericalDerivative(13, 7);
             strongWolfeLineSearch = new StrongWolfeLineSearch();
+            MaxIterLineSearch = maxIterLineSearch;
+            MaxIterLineSearchZoom = maxIterLineSearchZoom;
             EarlyExit = earlyExit;
             Precision = precision;
         }
 
         public BFGS()
-            : this(precisionConst, true)
+            : this(precisionConst, maxIterLS, maxIterLSZoom, true)
         { }
 
         #endregion
@@ -45,20 +53,20 @@ namespace ConsoleApplication1.Optimization
             double[] startValue,
             int nIter)
         {
-            MinVector xOld = new MinVector(startValue);
-            MinVector xNew = new MinVector();
-            MinVector derivativeOld = new MinVector(numericalDerivative.EvaluatePartialDerivative(f, xOld.MinArray, 1));
+            OptVector xOld = new OptVector(startValue);
+            OptVector xNew = new OptVector();
+            OptVector derivativeOld = new OptVector(numericalDerivative.EvaluatePartialDerivative(f, xOld.MinArray, 1));
 
-            MinVector[] oldInvHessian = OptimizationHelper.GetIdentity(startValue.Length);
-            MinVector direction = MinVector.Mult(oldInvHessian, -1.0 * derivativeOld);
+            OptVector[] oldInvHessian = OptimizationHelper.GetIdentity(startValue.Length);
+            OptVector direction = OptVector.Mult(oldInvHessian, -1.0 * derivativeOld);
             
-            MinVector derivativeNew = new MinVector();
+            OptVector derivativeNew = new OptVector();
 
             for (int i = 0; i < nIter; i++)
             {
-                StepSize = strongWolfeLineSearch.GetStepLength(f, direction, xOld, 4.0);
+                StepSize = strongWolfeLineSearch.GetStepLength(f, direction, xOld, 4.0, MaxIterLineSearch);
 
-                MinVector sk = StepSize * direction;
+                OptVector sk = StepSize * direction;
 
                 xNew = xOld + sk;
 
@@ -69,17 +77,16 @@ namespace ConsoleApplication1.Optimization
                     CheckEarlyExit(xNew, xOld))
                     break;
 
-                derivativeNew = new MinVector(numericalDerivative.EvaluatePartialDerivative(f, xNew.MinArray, 1));
+                derivativeNew = new OptVector(numericalDerivative.EvaluatePartialDerivative(f, xNew.MinArray, 1));
                 
-                MinVector yk = derivativeNew -
-                               derivativeOld;
+                OptVector yk = sk;
 
-                MinVector[] newInvHessian = GetApproximateInverseHessianMatrix(
+                OptVector[] newInvHessian = GetApproximateInverseHessianMatrix(
                                                 oldInvHessian,
                                                 yk,
                                                 sk);
 
-                direction = MinVector.Mult(newInvHessian, derivativeNew) * -1.0;
+                direction = OptVector.Mult(newInvHessian, derivativeNew) * -1.0;
 
                 xOld = xNew;
                 oldInvHessian = newInvHessian;
@@ -95,20 +102,20 @@ namespace ConsoleApplication1.Optimization
             double[] startValue,
             int nIter)
         {
-            MinVector xOld = new MinVector(startValue);
-            MinVector xNew = new MinVector();
-            MinVector derivativeOld = OptimizationHelper.Derivative(df, xOld);
+            OptVector xOld = new OptVector(startValue);
+            OptVector xNew = new OptVector();
+            OptVector derivativeOld = OptimizationHelper.Derivative(df, xOld);
 
-            MinVector[] oldInvHessian = OptimizationHelper.GetIdentity(startValue.Length);
-            MinVector direction = MinVector.Mult(oldInvHessian, -1.0 * derivativeOld);
+            OptVector[] oldInvHessian = OptimizationHelper.GetIdentity(startValue.Length);
+            OptVector direction = OptVector.Mult(oldInvHessian, -1.0 * derivativeOld);
 
-            MinVector derivativeNew = new MinVector();
+            OptVector derivativeNew = new OptVector();
 
             for (int i = 0; i < nIter; i++)
             {
                 StepSize = strongWolfeLineSearch.GetStepLength(f, df, direction, xOld, 5);
 
-                MinVector sk = StepSize * direction;
+                OptVector sk = StepSize * direction;
 
                 xNew = xOld + sk;
 
@@ -118,15 +125,15 @@ namespace ConsoleApplication1.Optimization
 
                 derivativeNew = OptimizationHelper.Derivative(df, xNew);
 
-                MinVector yk = derivativeNew -
+                OptVector yk = derivativeNew -
                             derivativeOld;
 
-                MinVector[] newInvHessian = GetApproximateInverseHessianMatrix(
+                OptVector[] newInvHessian = GetApproximateInverseHessianMatrix(
                                                 oldInvHessian,
                                                 yk,
                                                 sk);
 
-                direction = MinVector.Mult(newInvHessian, derivativeNew) * -1.0;
+                direction = OptVector.Mult(newInvHessian, derivativeNew) * -1.0;
 
                 xOld = xNew;
                 oldInvHessian = newInvHessian;
@@ -140,29 +147,29 @@ namespace ConsoleApplication1.Optimization
 
         #region Private Methods
 
-        private MinVector[] GetApproximateInverseHessianMatrix(
-            MinVector[] invHessian,
-            MinVector yk,
-            MinVector sk)
+        private OptVector[] GetApproximateInverseHessianMatrix(
+            OptVector[] invHessian,
+            OptVector yk,
+            OptVector sk)
         {
             double denom = yk * sk;
 
-            MinVector[] skyk = MinVector.Mult(sk, yk);
-            MinVector[] yksk = MinVector.Mult(yk, sk);
-            MinVector[] sksk = MinVector.Mult(sk, sk);
+            OptVector[] skyk = OptVector.Mult(sk, yk);
+            OptVector[] yksk = OptVector.Mult(yk, sk);
+            OptVector[] sksk = OptVector.Mult(sk, sk);
 
-            MinVector[] v1 = MinVector.SubtractFromIdentity(MinVector.Div(skyk, denom));
-            MinVector[] v2 = MinVector.SubtractFromIdentity(MinVector.Div(yksk, denom));
-            MinVector[] v3 = MinVector.Div(sksk, denom);
+            OptVector[] v1 = OptVector.SubtractFromIdentity(OptVector.Div(skyk, denom));
+            OptVector[] v2 = OptVector.SubtractFromIdentity(OptVector.Div(yksk, denom));
+            OptVector[] v3 = OptVector.Div(sksk, denom);
             
-            return MinVector.Sum(MinVector.Mult(MinVector.Mult(v1, invHessian), v2), v3);
+            return OptVector.Sum(OptVector.Mult(OptVector.Mult(v1, invHessian), v2), v3);
         }
 
         private bool CheckEarlyExit(
-            MinVector xNew,
-            MinVector xOld)
+            OptVector xNew,
+            OptVector xOld)
         {
-            MinVector diff = xNew - xOld;
+            OptVector diff = xNew - xOld;
 
             double result = 0.0;
 

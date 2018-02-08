@@ -156,7 +156,7 @@ namespace ConsoleApplication1.Optimization
         /// <returns>Function derivative at x of the specified order.</returns>
         public double EvaluateDerivative(Func<double[], double> f, double x, int order, double? currentValue = null)
         {
-            var xmin = new MinVector(x);
+            var xmin = new OptVector(x);
             var c = _coefficients.GetCoefficients(Center, order);
             var h = CalculateStepSize(_points, x, order);
 
@@ -167,7 +167,7 @@ namespace ConsoleApplication1.Optimization
                     points[i] = currentValue.Value;
                 else if (c[i] != 0) // Only evaluate function if it will actually be used.
                 {
-                    points[i] = f((new MinVector(xmin + (i - Center) * h)).MinArray);
+                    points[i] = f((new OptVector(xmin + (i - Center) * h)).MinArray);
                     Evaluations++;
                 }
             }

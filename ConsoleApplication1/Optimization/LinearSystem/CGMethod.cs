@@ -27,25 +27,25 @@ namespace ConsoleApplication1.Optimization.LinearSystem
 
         #region Public Methods
 
-        public MinVector Solve(
-            MinVector[] A,
-            MinVector b,
-            MinVector startX,
+        public OptVector Solve(
+            OptVector[] A,
+            OptVector b,
+            OptVector startX,
             int nIter)
         {
-            MinVector[] normA = A;
-            MinVector normb = b;
+            OptVector[] normA = A;
+            OptVector normb = b;
 
-            if (!MinVector.Equals(A, MinVector.Transpose(A)))
+            if (!OptVector.Equals(A, OptVector.Transpose(A)))
             {
-                MinVector[] At = MinVector.Transpose(A);
-                normA = MinVector.Mult(At, A);
-                normb = MinVector.Mult(At, b);
+                OptVector[] At = OptVector.Transpose(A);
+                normA = OptVector.Mult(At, A);
+                normb = OptVector.Mult(At, b);
             }
             
-            MinVector rNew = normb - MinVector.Mult(normA, startX);
-            MinVector p = rNew;
-            MinVector x = new MinVector(startX);
+            OptVector rNew = normb - OptVector.Mult(normA, startX);
+            OptVector p = rNew;
+            OptVector x = new OptVector(startX);
             double r2Old = rNew * rNew;
 
             double alpha = 1.0;
@@ -57,7 +57,7 @@ namespace ConsoleApplication1.Optimization.LinearSystem
 
                 x = x + alpha * p;
 
-                rNew = rNew - alpha * MinVector.Mult(normA, p);
+                rNew = rNew - alpha * OptVector.Mult(normA, p);
 
                 double r2New = rNew * rNew;
 
@@ -79,11 +79,11 @@ namespace ConsoleApplication1.Optimization.LinearSystem
         #region Private Methods
 
         public double GetAlpha(
-            MinVector[] A,
-            MinVector p,
+            OptVector[] A,
+            OptVector p,
             double num)
         {
-            var denom = p * MinVector.Mult(A, p);
+            var denom = p * OptVector.Mult(A, p);
 
             if (denom == 0.0)
                 return 1.0;
