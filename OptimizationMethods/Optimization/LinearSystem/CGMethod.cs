@@ -1,5 +1,5 @@
 ﻿
-namespace ConsoleApplication1.Optimization.LinearSystem
+namespace OptimizationMethods.Optimization.LinearSystem
 {
     public sealed class CGMethod
     {

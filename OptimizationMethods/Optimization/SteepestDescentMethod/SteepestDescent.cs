@@ -1,7 +1,7 @@
-﻿using ConsoleApplication1.Optimization.SequentialQuadraticProgramming;
+﻿using OptimizationMethods.Optimization.SequentialQuadraticProgramming;
 using System;
 
-namespace ConsoleApplication1.Optimization.SteepestDescentMethod
+namespace OptimizationMethods.Optimization.SteepestDescentMethod
 {
     public sealed class SteepestDescent
     {

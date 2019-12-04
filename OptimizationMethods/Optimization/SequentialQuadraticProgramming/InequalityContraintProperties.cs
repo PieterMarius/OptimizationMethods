@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
+namespace OptimizationMethods.Optimization.SequentialQuadraticProgramming
 {
     public class InequalityConstraintProperties
     {

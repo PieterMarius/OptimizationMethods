@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizationMethods", "ConsoleApplication1\OptimizationMethods.csproj", "{D11ABAA3-D36F-4528-8103-8F5CCCC9EC04}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimizationMethods", "OptimizationMethods\OptimizationMethods.csproj", "{D11ABAA3-D36F-4528-8103-8F5CCCC9EC04}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -7,8 +7,8 @@
     <ProjectGuid>{D11ABAA3-D36F-4528-8103-8F5CCCC9EC04}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ConsoleApplication1</RootNamespace>
-    <AssemblyName>ConsoleApplication1</AssemblyName>
+    <RootNamespace>OptimizationMethods</RootNamespace>
+    <AssemblyName>OptimizationMethods</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -80,6 +80,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestSQP.cs" />
+    <Compile Include="Utils\InverseCDF.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

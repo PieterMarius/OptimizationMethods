@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ConsoleApplication1.Optimization
+namespace OptimizationMethods.Optimization
 {
     public struct OptVector
     {

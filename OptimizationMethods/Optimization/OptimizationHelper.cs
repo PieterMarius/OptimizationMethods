@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ConsoleApplication1.Optimization
+namespace OptimizationMethods.Optimization
 {
     public static class OptimizationHelper
     {

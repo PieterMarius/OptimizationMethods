@@ -1,5 +1,5 @@
-﻿using ConsoleApplication1.Optimization;
-using ConsoleApplication1.Optimization.SequentialQuadraticProgramming;
+﻿using OptimizationMethods.Optimization;
+using OptimizationMethods.Optimization.SequentialQuadraticProgramming;
 using System;
 using System.Collections.Generic;
 

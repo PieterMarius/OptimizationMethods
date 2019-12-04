@@ -4,7 +4,7 @@ using System;
 using System.Linq;
 
 
-namespace ConsoleApplication1.Optimization
+namespace OptimizationMethods.Optimization
 {
 
     public class OptimizationNumericalDerivative

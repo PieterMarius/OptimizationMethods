@@ -1,10 +1,10 @@
-﻿using ConsoleApplication1.Optimization.LinearSystem;
+﻿using OptimizationMethods.Optimization.LinearSystem;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace ConsoleApplication1.Optimization.SequentialQuadraticProgramming
+namespace OptimizationMethods.Optimization.SequentialQuadraticProgramming
 {
     public sealed class SQP
     {

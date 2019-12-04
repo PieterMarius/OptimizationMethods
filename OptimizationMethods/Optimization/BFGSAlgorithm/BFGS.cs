@@ -1,8 +1,8 @@
-﻿using ConsoleApplication1.Optimization.SequentialQuadraticProgramming;
+﻿using OptimizationMethods.Optimization.SequentialQuadraticProgramming;
 using System;
 using System.Linq;
 
-namespace ConsoleApplication1.Optimization
+namespace OptimizationMethods.Optimization
 {
     public sealed class BFGS
     {
